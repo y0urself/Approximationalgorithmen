@@ -46,6 +46,10 @@
 
 _Beispiele_: [Rucksack](#rucksackproblem), TSP
 
+[up](#approximationsalgorithmen)
+
+---
+
 ### relative Gütegarantie
 
 &alpha;-Approximation
@@ -66,9 +70,33 @@ _Beispiele_: [Rucksack](#rucksackproblem), TSP
 * (Opt(J) - A(J)) / Opt(J) &le; &epsilon; <br>
 A(J) &le; (1 + &epsilon;) &middot; Opt(J)
 
+---
+
 #### scharfe Gütegarantie
 
+Gütegarantie ist _scharf_, wenn:
+* eine Instanz J für die A(J) die Gütegarantie mit Gleichheit erfüllt
+* eine Folge von Instanzen, dessen Grenzwert die Gütegarantie mit Gleichheit erfüllt
+
+Beweis durch Beispiel genügt!
+
+---
+
 #### asymptotische Gütegarantie
+
+Es existiert eine Konstante `d`, sodass
+
+**A(J) &le; &alpha;&middot; Opt(J) + d** für alle Probleminstanzen `J`
+
+außerdem gibt es noch:
+
+Es existiert eine Konstante `d'`, sodass
+
+**A(J) &le; &alpha;&middot; Opt(J)** für alle Probleminstanzen `J` mit Opt(J) &gt; `d'`
+
+[up](#approximationsalgorithmen)
+
+---
 
 ### Approximationsschema
 
@@ -222,6 +250,138 @@ Weiterhin gibt es m identische Maschinen (CPUs) mit m &gt; 1.
 
 **Gesucht** ist die optimale Aufteilung der Jobs auf die Maschinen, sodass die Jobs schnellstmöglich erledigt sind. <br>
 Das bedeutet: Partition der Jobs J in m disjunkte Teilmengen `J1, J2, ..., Jm`, sodass max(Laufzeit Maschine) minimiert wird.
+
+---
+
+**Theorem**: Bereits für m=2 ist Multiprocessor Scheduling _NP-vollständig_.
+
+---
+
+### List Scheduling
+(Greedy-Algorithmus)
+```
+Jobs nacheinander auf die Maschinen legen - dabei den nächsten Job
+immer auf die am Maschine legen, die zuerst Fertig wird.
+```
+
+_offline_ Problemstellung - d.h. es sind alle Jobs bekannt bevor der Algorithmus startet. Geht auch _online_ ...
+
+**Theorem**: List Scheduling hat eine [scharfe relative Gütegarantie](#scharfe-gütegarantie) von `2-1/m`
+
+**Beweis** der [Gütegarantie](#relative-gütegarantie):
+
+`Mi`ist Maschine mit längster Laufzeit `A(J)`. Auf ihr läuft der letzte Job j. <br>
+`P` ist die Summe der Laufzeiten aller Jobs.
+Jede Maschine in M läuft mindestens `A(J)` - `pj`
+
+&rarr; `P` &ge; `m` &middot; (`A(J)` - `pj`) + `pj`
+
+Außerdem gilt für `Opt(J)`:
+
+&rarr; `Opt(J)` &ge; `P`/`m` <br>
+&rarr; `Opt(J)` &ge; `pj`
+
+Eingesetzt:
+
+`Opt(J)` &ge; (`A(J)` - `pj`) + `pj`/ `m` <br>
+`Opt(J)` &ge; `A(J)` - (1 - (1/ `m`)) &middot; `pj` <br>
+`Opt(J)` &ge; `A(J)` - (1 - (1/ `m`)) &middot; `Opt(J)` <br>
+(2 - 1/m) `Opt(J)` &ge; `A(J)`
+
+**Beweis** der [Schärfe](#scharfe-gütegarantie):
+
+Instanz J hat m(m-1) Jobs der Länge 1 und einen großen Job der Länge m.
+
+**Optimum** `Opt(J)`:
+
+|M | 1| 2| 3| 4| 5| 6| 7| 8| 9| m|
+|---|---|---|---|---|---|---|---|---|---|---|
+|M1|m|m|m|m|m|m|m|m|m|m|
+|M2|1|1|1|1|1|1|1|1|1|1|
+|M3|1|1|1|1|1|1|1|1|1|1|
+|M4|1|1|1|1|1|1|1|1|1|1|
+|M5|1|1|1|1|1|1|1|1|1|1|
+
+`Opt(J)` = m
+
+**List Scheduling** `A(J)`:
+
+|M | 1| 2| 3| 4| 5| 6| 7| 8| 9| m| | | | | | | | | |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+|M1|1|1|1|1|1|1|1|1|1|m|m|m|m|m|m|m|m|m|m|
+|M2|1|1|1|1|1|1|1|1|1|| | | | | | | | | | |
+|M3|1|1|1|1|1|1|1|1|1|| | | | | | | | | | |
+|M4|1|1|1|1|1|1|1|1|1|| | | | | | | | | | |
+|M5|1|1|1|1|1|1|1|1|1|| | | | | | | | | | |
+
+`A(J)` = (m-1) + m
+
+---
+
+#### Longest-Processing-Time List-Scheduling
+(LPT)
+
+* Jobs zunächst absteigend nach Größe sortieren
+* dann List Scheduling
+
+**Theorem**: LPT hat eine [relative Gütegarantie](#relative-gütegarantie) von `(4/3) - (1/3)m`.
+
+[up](#approximationsalgorithmen)
+
+---
+
+## Bin Packing
+
+**Gegeben** ist eine Menge I mit n Gegenständen (_items_) I := {1, 2, ..., n}.
+Jedes _item_ n hat ein Gewicht w&#x2099; <br>
+Bin-Kapazität B.
+
+**Gesucht** ist eine _gültige_ Aufteilung der _items_ in die Bins, sodass keiner übervoll ist. Minimieren über die Anzahl der Bins.
+
+**Grundannahme**: das Gewicht eines jeden Items ist &le; B.
+
+**Normierung**:<br>
+B auf 1 skalieren, sowie alle Gewichte mit dem gleichen Faktor auf 0 &lt; w &lt; 1.
+
+---
+
+**Theorem**: Falls P &ne; NP, existiert kein [APX](#approximationsalgorithmus) mit [relative Gütegarantie](#relative-gütegarantie) &alpha; &lt; 1.5 für Bin-Packing.
+
+### Next-Fit
+
+### First-Fit
+
+### und mehr Fits ...
+
+[up](#approximationsalgorithmen)
+
+---
+
+## Partitionsproblem
+
+**Gegeben** ist eine Menge natürlicher Zahlen I := {a1, a2, ..., an}. Aufsummiert ergeben die Zahlen `s`.
+
+**Gesucht** ist eine Aufteilung der Zahlen in zwei Gruppen A1 und A2, sodass ihre Summe je `s`/2 ist.
+
+[up](#approximationsalgorithmen)
+
+---
+
+## Traveling Salesman Problem
+(TSP)
+
+[up](#approximationsalgorithmen)
+
+---
+
+## Metrisches TSP
+(&Delta;TSP)
+
+### Euler-Tour
+
+### MST-Heuristik
+
+### Christofides-Heuristik
 
 [up](#approximationsalgorithmen)
 
