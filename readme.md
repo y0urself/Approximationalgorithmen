@@ -255,8 +255,6 @@ Das bedeutet: Partition der Jobs J in m disjunkte Teilmengen `J1, J2, ..., Jm`, 
 
 **Theorem**: Bereits für m=2 ist Multiprocessor Scheduling _NP-vollständig_.
 
----
-
 ### List Scheduling
 (Greedy-Algorithmus)
 ```
@@ -265,6 +263,8 @@ immer auf die am Maschine legen, die zuerst Fertig wird.
 ```
 
 _offline_ Problemstellung - d.h. es sind alle Jobs bekannt bevor der Algorithmus startet. Geht auch _online_ ...
+
+---
 
 **Theorem**: List Scheduling hat eine [scharfe relative Gütegarantie](#scharfe-gütegarantie) von `2-1/m`
 
@@ -347,11 +347,135 @@ B auf 1 skalieren, sowie alle Gewichte mit dem gleichen Faktor auf 0 &lt; w &lt;
 
 **Theorem**: Falls P &ne; NP, existiert kein [APX](#approximationsalgorithmus) mit [relative Gütegarantie](#relative-gütegarantie) &alpha; &lt; 1.5 für Bin-Packing.
 
+**Beweis** mit [Partitionsproblem](#partitionsproblem):
+
+*Gegeben* ist beliebige Instanz J des Partitionsproblems. Seien eine Zahl das Itemgewicht beim Bin Packing.
+Sowie `s`/2 die Bin-Kapazität.
+* Partitionsproblem erfüllbar &rarr; 2 Bins reichen
+* Partitionsproblem unerfüllbar &rarr; (mind.) 3 Bins nötig
+
+Für das erfüllbare Problem müsste der Algorithmus A mit &alpha; &lt; 1.5 weniger als 3 Bins brauchen <br>
+&rarr; A würde nur 2 Bins benötigen und damit _NP-vollständiges_ Problem ([Partition](#partitionsproblem)) lösen.
+
+---
+
 ### Next-Fit
+(NF) (Greedy Algorithmus) Laufzeit: `O(n)`
+```
+Lege items der Reihe nach in den aktuellen Bin.
+Falls item nicht passt, neuen Bin aufmachen.
+```
+---
+
+**Theorem**: Next-Fit hat eine scharfe (auch [asymptotische](#asymptotische-gütegarantie) [relative Gütegarantie](#relative-gütegarantie) &alpha; = 2.
+
+**Beweis** der Güte:
+
+Betrachte zwei beliebige benachbarte Bins.
+Summe der beiden Bins ist größer als B, sonst hätte NF die Items des 2. Bins noch in den 1. gepackt. <br>
+&rarr; NF benötigt maximal doppelt so viele Bins  wie Opt.
+
+[up](#approximationsalgorithmen)
+
+---
 
 ### First-Fit
+(FF) (Greedy Algorithmus) Laufzeit: `O(n log(n)`
+```
+Lege items der Reihe nach in den ersten Bin, in dem es Platz findet.
+```
+---
+
+**Theorem**: First-Fit hat eine scharfe (auch [asymptotische](#asymptotische-gütegarantie) [relative Gütegarantie](#relative-gütegarantie) &alpha; = 2.
+
+**Beweis** der Güte:
+
+Betrachte zwei beliebige Bins.
+Summe der beiden Bins ist größer als B, sonst hätte NF die Items des 2. Bins noch in den 1. gepackt. <br>
+&rarr; FF benötigt maximal doppelt so viele Bins  wie Opt.
+
+[up](#approximationsalgorithmen)
+
+---
 
 ### und mehr Fits ...
+* Best-Fit (BF)
+* Worst-Fit (WF)
+* Almost-Worst-Fit (AWF)
+* Any-Fit (AF)
+
+"Es gibt keine bessere Strategie als FF/BF und keine Strategie kann schlechter als NF sein."
+
+---
+
+#### Worst-Case Beweis
+
+First-Fit mit &exist;J: FF(J) &ge; (5/3) &middot; Opt(J))
+
+Instanz:
+* 18m Items (Reihenfolge)
+  * 6m mal (1/7)+&epsilon;
+  * 6m mal (1/3)+&epsilon;
+  * 6m mal (1/2)+&epsilon;
+  
+**Opt** = 6m
+
+|Anzahl| Inhalt|
+|---|---|
+|6m Bins | je ein Item pro Typ|
+
+**FF** = 10m
+
+|Anzahl| Inhalt|
+|---|---|
+|m Bins | 6x (1/7)+&epsilon; |
+|3m Bins | 2x (1/3)+&epsilon; |
+|6m Bins | (1/2)+&epsilon; |
+
+10m/6m = 5/3
+
+Problem ist nur die "_dumme_" Reihenfolge, sonst würde FF das Optimum liefern.
+
+---
+
+### erweiterte Bin Packing Heuristiken
+
+* Fit erst nach Größe sortieren. (Decreasing)
+
+**Theorem**: First-Fit-Decreasing und Best-Fit-Decreasing haben scharfe (nicht-asymptotische) [relative Gütegarantie](#relative-gütegarantie) &alpha; = (3/2). <br>
+  *besser geht nicht!*
+
+**Theorem**: First-Fit-Decreasing und Best-Fit-Decreasing haben scharfe asymtotische [relative Gütegarantie](#relative-gütegarantie) &alpha; = (11/9). <br>
+  *besser als nicht-asymptotisch*
+
+(ohne Güte-Beweis!)
+
+**Schärfe**:
+
+Instanz:
+  * `a` 6m mal (1/2)+&epsilon;
+  * `b` 6m mal (1/4)+2&epsilon;
+  * `c` 6m mal (1/4)+&epsilon;
+  * `d` 12m mal (1/4)-2&epsilon;
+  
+  **Opt** = 9m
+  
+  |Anzahl| Inhalt|
+  |---|---|
+  |6m Bins | `a` + `c` + `d` |
+  |3m Bins | `b` + `b` + `d` + `d`|
+  
+  **FF** = 11m
+  
+  |Anzahl| Inhalt|
+  |---|---|
+  |6m Bins | `a` + `b` |
+  |2m Bins | `c` + `c` + `c` |
+  |3m Bins | `d` +  `d` +  `d` +  `d`|
+
+11m/9m = 11/9
+
+**Theorem**:  Modified First-Fit Decreasing (MFFD) (mit speziellen Regen für Items &isin;(1/6, 1/3] hat scharfe asymptotische relative Gütegarantie von &alpha; = 71/60 = 1.18333....
 
 [up](#approximationsalgorithmen)
 
@@ -370,12 +494,82 @@ B auf 1 skalieren, sowie alle Gewichte mit dem gleichen Faktor auf 0 &lt; w &lt;
 ## Traveling Salesman Problem
 (TSP)
 
+**Gegeben** sind `n` Orte und Distanzen `d` zwischen ihnen. Repräsentiert als vollständiger Graph G=(V, E) mit V als Orte und Kantenkosten als Distanzen.
+
+**Gesucht** ist die kürzeste Rundreise, die alle Orte _genau_ 1x besucht
+(_NP-schwer_!)
+
+---
+
+**Theorem**: Falls P &ne; NP, existiert kein [APX](#approximationsalgorithmus) mit konstanter [absoluter Gütegarantie](#absolute-gütegarantie) k.
+
+**Beweis** durch [Scaling](#scaling). (hier nicht.)
+
+---
+
+**Theorem**: Falls P &ne; NP, existiert kein [APX](#approximationsalgorithmus) mit konstanter [relativer Gütegarantie](#relativer-gütegarantie) k.
+
+**Beweis**:
+
+Angenommen es gäbe Algorithmus A mit [relativer Gütegarantie](#relativer-gütegarantie)  &alpha;.
+
+Gegeben ist eine beliebige Instanz G des [Hamilton-Kreis Problems](#hamilton-kreis).
+Jede Kante in G hat Länge 1.
+Erweitere G zu einem vollständigen Graphen, dabei haben die neu entstehenden Kanten die Länge n&alpha;+1.
+
+G hat Hamilton-Kreis der Länge n, der gleichzeitig optimale TSP-Lösung ist.
+
+Die zweitbeste TSP-Lösung hätte die Länge &ge; n-1 + n&alpha;+1 = n(&alpha; + 1).
+
+Da diese Lösung aber größer ist als Opt &middot; &alpha; müsste der Algorithmus A den Hamiltonkreis finden.
+
 [up](#approximationsalgorithmen)
 
 ---
 
 ## Metrisches TSP
 (&Delta;TSP)
+
+Metrik? Abbildungsfunktion.
+1. Identität
+2. Symmetrie
+3. Dreiecksungleichung (d(u,w) &le; d(u,v) + d(v,w))
+
+* Oft sind TSPs metrisch (Landkarte, ...)
+* falls nich (Fahrzeiten in einem Straßennetz), reicht oft "besuche jeden Ort _mindestens_ 1x"
+  * Instanzen metrisieren, falls d(u,w) &gt; d(u,v) + d(v,w): mache d(u,w) = d(u,v) + d(v,w)
+
+**Trotzdem**: <br>
+_NP-schwer_, aber viel einfacher zu approximieren
+
+### Approximationsheuristiken für &Delta;TSP
+
+#### Nearest-Neighbor
+
+```
+Starte irgendwo, nimm nächsten Nachbarn.
+Gehe zuletzt zurück zum Start.
+```
+
+#### Insertion-Algorithmen
+
+```
+Starte mit trivialer Tour. z.B. < 3 Knoten
+Wähle Knoten der nicht in der Tour liegt nach (*) Kriterium.
+Ersetze eine Kante mit den Kanten die den neuen Knoten umschließen,
+sodass der Umweg am kleinsten ist.
+
+(*) nearest, cheapest, farthest, random, ...
+```
+
+
+Nearest/Cheapest Insertion: *relative Güte*: &alpha; = 2 (scharf) <br>
+Farthest Insertion: *relative Güte*: &alpha; &ge; 2.43 <br>
+Random Insertion: *relative Güte*: &alpha; &ge; log(log(n)) / log(log(log(n)))
+
+**Theorem**: Jede mögliche Insertion-Strategie hat eine relative Güte &alpha; &le; log(n) + 1.
+
+#### Verbesserungsheuristiken: 2-Opt (_k-Opt_)
 
 ### Euler-Tour
 
@@ -386,6 +580,14 @@ B auf 1 skalieren, sowie alle Gewichte mit dem gleichen Faktor auf 0 &lt; w &lt;
 [up](#approximationsalgorithmen)
 
 ---
+
+## Hamilton-Kreis
+
+**Gegeben** ist ein Graph G.
+
+**Gesucht** ist ein Kreis in G, der jeden Knoten genau einmal besucht.
+
+Problem ist _NP-vollständig_.
 
 ## VertexCover und SetCover
 
@@ -405,24 +607,6 @@ B auf 1 skalieren, sowie alle Gewichte mit dem gleichen Faktor auf 0 &lt; w &lt;
 
 Folie 16: G^k+1 -> Clique = 1, dann k+1 > k ... Widerspruch
 
-Folie 20:
-m1 ... ..... ... .......
-m2 ... ....... ... ....
-mi ... ..... ......... ...j.....
-m  .... ... ...... ....
- 
-      ------------A(J)-------------
-   
-
-      m1 . . . . . . . . . ......m.......
-      .
-      .  .
-      .  .
-      .  .
-      
-      mm .
-      
-      -------------2m-1---------------
 
 Folie 25:
 
