@@ -3,13 +3,25 @@
 
 * [Classics](#classics)
   * [Gütegarantie](#gütegarantie)
+  * [Approximationsschema](#approximationsschema)
   * [Graphenfärbung](#graphenfärbung)
   * [Rucksackproblem](#rucksackproblem)
   * [Clique](#clique)
   * [Scheduling](#scheduling)
+  * [Bin Packing](#bin-packing)
+    * [Next-Fit](#next-fit)
+    * [First-Fit](#first-fit)
+  * [Partition](#partition)
+  * [Traveling Salesman Problem](#traveling-salesman-problem)
+  * [metrisches TSP](#metrisches-tsp)
+  * [Euler-Tour](#euler-tour)
+  * [Hamilton-Kreis](#hamilton-kreis)
+* [VertexCover und SetCover](#vertexcover-und-setcover)
+  * [VertexCover](#vertexcover)
+  * [SetCover](#setcover)
 
 
-## Classics
+# Classics
 
 * _alle_ Zahlen sind ganzzahlig bzw. rational !
 * `Opt(J)` ist polynomiell beschränkt in Instanzgröße `J` und der Größe der in  `J` vorkommenden Zahlen
@@ -98,13 +110,27 @@ Es existiert eine Konstante `d'`, sodass
 
 ---
 
-### Approximationsschema
+## Approximationsschema
 
-#### polynomielles Approximationsschema (PTAS)
+Familie von parametrisierten Approximationsalgorithmen
 
-#### effizientes polynomielles Approximationsschema (EPTAS)
+### polynomielles Approximationsschema (PTAS)
 
-#### vollständig polynomielles Approximationsschema (FPTAS)
+Für jede Konstante &epslion; &gt; 0 ist Algorithmus A&epsilon; eine (1&plusmn; &epsilon;)-Approximation. <br>
+Laufzeit is polynomiell in Eingabegröße n (für konst. &epsilon;), Polynom hängt von &epsilon; ab.
+
+_Beispiel_: O(n^(1/&epsilon;)
+
+### effizientes polynomielles Approximationsschema (EPTAS)
+
+PTAS mit einer Laufzeit von O(f(&epsilon; &middot; n^c), wobei c eine von &epsilon; unabhängige Konstante ist.
+
+_Beispiel_: O(2^(1/&epsilon;) &middot; n^5)
+
+### vollständig polynomielles Approximationsschema (FPTAS)
+PTAS mit einer Laufzeit die polynomiell in n und 1/&epsilon; ist.
+
+_Beispiel_: O(n^5/&epsilon^4)
 
 [up](#approximationsalgorithmen)
 
@@ -355,7 +381,7 @@ Sowie `s`/2 die Bin-Kapazität.
 * Partitionsproblem unerfüllbar &rarr; (mind.) 3 Bins nötig
 
 Für das erfüllbare Problem müsste der Algorithmus A mit &alpha; &lt; 1.5 weniger als 3 Bins brauchen <br>
-&rarr; A würde nur 2 Bins benötigen und damit _NP-vollständiges_ Problem ([Partition](#partitionsproblem)) lösen.
+&rarr; A würde nur 2 Bins benötigen und damit _NP-vollständiges_ Problem ([Partition](#partition)) lösen.
 
 ---
 
@@ -481,7 +507,7 @@ Instanz:
 
 ---
 
-## Partitionsproblem
+## Partition
 
 **Gegeben** ist eine Menge natürlicher Zahlen I := {a1, a2, ..., an}. Aufsummiert ergeben die Zahlen `s`.
 
@@ -496,8 +522,9 @@ Instanz:
 
 **Gegeben** sind `n` Orte und Distanzen `d` zwischen ihnen. Repräsentiert als vollständiger Graph G=(V, E) mit V als Orte und Kantenkosten als Distanzen.
 
-**Gesucht** ist die kürzeste Rundreise, die alle Orte _genau_ 1x besucht
-(_NP-schwer_!)
+**Gesucht** ist die kürzeste Rundreise, die alle Orte _genau_ 1x besucht <br>
+(_NP-schwer_!) <br>
+Liegt nicht in APX-schwer!
 
 ---
 
@@ -541,6 +568,9 @@ Metrik? Abbildungsfunktion.
 
 **Trotzdem**: <br>
 _NP-schwer_, aber viel einfacher zu approximieren
+-APX-schwer_, lässt sich nicht besser als 220/219 approximieren
+
+---
 
 ### Approximationsheuristiken für &Delta;TSP
 
@@ -550,6 +580,8 @@ _NP-schwer_, aber viel einfacher zu approximieren
 Starte irgendwo, nimm nächsten Nachbarn.
 Gehe zuletzt zurück zum Start.
 ```
+
+---
 
 #### Insertion-Algorithmen
 
@@ -569,13 +601,84 @@ Random Insertion: *relative Güte*: &alpha; &ge; log(log(n)) / log(log(log(n)))
 
 **Theorem**: Jede mögliche Insertion-Strategie hat eine relative Güte &alpha; &le; log(n) + 1.
 
-#### Verbesserungsheuristiken: 2-Opt (_k-Opt_)
+---
 
-### Euler-Tour
+#### Verbesserungsheuristiken: 2-Opt (_k-Opt_)
+```
+Mit beliebiger (feasable) Tour starten.
+Alle Kantenpaare (a,b) und (x,y) überprüfen ob (a,x) und (b,y) Tour verbessert.
+```
+
+**Theorem**: 2-Opt hätte &alpha; &ge; n^(1/2)
+
+**Laufzeit**: O(n&sup2;) pro Iteration. <br>
+Es gibt aber Instanzen die exponentiell viele Iterationen benötigen.
+
+&rarr; **kein** [APX](#approximationsalgorithmus)!
+
+#### k-Opt
+k Kanten tauschen ...
+
+Lin-Kernighan Heuristik: k-Opt mit wachsendem k und Tricks und so. <br>
+&rarr; beste Heuristik in der Praxis.
+
+[up](#approximationsalgorithmen)
+
+---
 
 ### MST-Heuristik
+```
+1. Berechne minimalen Spannbaum B von Graph G.
+2. Verdopple Kanten von B -> es entsteht Eulertour ET
+3. Laufe Eulertour lang und "überspringe" schon besuchte Knoten
+4. Freue dich über die entstandende TSP-Tour
+```
+
+**Theorem**: MST-Heuristig hat für &Delta;TSP scharfe Gütegarantie von &alpha; = 2.
+
+**Beweis** der Güte:
+
+`O` sei optimale TSP Tour. Entfernen wir beliebige Kante aus `O`, entsteht Spannbaum. <br>
+Dieser Spannbaum ist &ge; d(B) <br>
+Weiterhin ist d(ET) = 2 &middot; d(B) <br>
+Wegen der &Delta;-Ungleichung ist d(T) &le; d(ET)
+
+Somit ergibt sich, dass d(T) &le; 2 &middot; Opt(J)
+
+[up](#approximationsalgorithmen)
+
+---
 
 ### Christofides-Heuristik
+```
+1. Berechne minimalen Spannbaum B von Graph G.
+2. Berechne minimales perfektes Matching M zwischen den Knoten mit ungeradem Grad in B
+   [O(n^3)]
+3. Vereinige die Knotenmengen aus B und M, daraus entsteht Eulertour ET.
+4. Laufe Eulertour lang und "überspringe" schon besuchte Knoten
+5. Freue dich über die entstandende TSP-Tour
+```
+
+**Theorem**: Christofides-Heuristig hat für &Delta;TSP scharfe Gütegarantie von &alpha; = 1.5.
+
+&rarr; beste bekannte Approximationsgüte.
+
+[up](#approximationsalgorithmen)
+
+---
+
+## Euler-Tour
+
+**Gegeben**: Multigraph G (mit Mehrfachkanten)
+
+**Gesucht**: Euler-Tour in diesem Multigraphen G, der jede Kante genau einmal besucht.
+
+---
+
+**Theorem**:
+* G erlaubt eine Euler-Tour, genau dann wenn alle Knoten geraden Grad haben.
+* G erlaubt einen Euler-Pfad, genau dann wenn alle Knoten bis auf 2 geraden Grad haben.
+
 
 [up](#approximationsalgorithmen)
 
@@ -589,7 +692,19 @@ Random Insertion: *relative Güte*: &alpha; &ge; log(log(n)) / log(log(log(n)))
 
 Problem ist _NP-vollständig_.
 
-## VertexCover und SetCover
+[up](#approximationsalgorithmen)
+
+---
+
+# VertexCover und SetCover
+
+## VertexCover
+
+[up](#approximationsalgorithmen)
+
+---
+
+## SetCover
 
 [up](#approximationsalgorithmen)
 
