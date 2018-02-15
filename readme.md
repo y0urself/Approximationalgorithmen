@@ -1,5 +1,6 @@
 # Approximationsalgorithmen
-(nach Prof. M. Chimani)
+(nach Prof. M. Chimani)<br>
+[alles ohne Gewähr.]
 
 * [Classics](#classics)
   * [Gütegarantie](#gütegarantie)
@@ -56,7 +57,7 @@
 #### Scaling:
 * mögliche Art um zu beweisen, dass keine absolute Gütegarantie existiert.
 
-_Beispiele_: [Rucksack](#rucksackproblem), TSP
+_Beispiele_: [Rucksack](#rucksackproblem), [TSP](#traveling-salesman-problem)
 
 [up](#approximationsalgorithmen)
 
@@ -153,8 +154,12 @@ Dabei ist c = &chi;(G) = _Chromatische Zahl_ von G
   
 #### planarer Graph
   * In der Ebene kann der Graph G ohne gekreuzte Kanten gezeichnet werden.
-    * **Theorem**: Festzustellen, ob planarer Graph in 3 Farben knoten-färbbar ist, ist _NP-vollständig_.
-    * **Theorem**: Jeder Graph G lässt sich mit _maximal_ 5 Farben knoten-färben. (Es reichen sogar 4 ...)
+
+---
+> **Theorem**: Festzustellen, ob planarer Graph in 3 Farben knoten-färbbar ist, ist _NP-vollständig_.
+---
+> **Theorem**: Jeder Graph G lässt sich mit _maximal_ 5 Farben knoten-färben. (Es reichen sogar 4 ...)
+---
 
 #### [Approximationsalgorithmus](#approximationsalgorithmus-apx)
 ```
@@ -188,9 +193,9 @@ Wenn &Delta;(G) der maximale Grad vom Graph G ist, so benötigen wir mindestens 
 #### Satz von Vizing (1964)
 Wir benötigen maximal &Delta;(G)+1 Farben um Graph G kanten-zu-färben.
 
-**Theorem**:
-
-Es ist _NP-vollständig_ festzustellen ob ein Graph G mit &Delta;(G) Farben kanten-einfärbar ist.
+---
+> **Theorem**: Es ist _NP-vollständig_ festzustellen ob ein Graph G mit &Delta;(G) Farben kanten-einfärbar ist.
+---
 
 #### [Approximationsalgorithmus](#approximationsalgorithmus-apx)
 ```
@@ -212,10 +217,8 @@ Weiterhin gibt es eine Rucksackgröße B.
 **Gesucht** ist eine _gültige_ Teilmenge I'&sube;I der _items_ mit w(I') := &Sigma; w&#x2099; &le; B, so dass gleichzeitig p(I') := &Sigma; p&#x2099; maximiert wird.
 
 ---
-
-**Theorem**:
-
-Falls P &ne; NP, so existiert kein [APX](#approximationsalgorithmus-apx) mit [absoluter Gütegarantie](#absolute-gütegarantie) für das Rucksackproblem.
+> **Theorem**: Falls P &ne; NP, so existiert kein [APX](#approximationsalgorithmus-apx) mit [absoluter Gütegarantie](#absolute-gütegarantie) für das Rucksackproblem.
+---
 
 **Beweis durch [_Scaling_](#scaling)**:
 
@@ -237,6 +240,181 @@ Wir könnten J also in polynomieller Zeit _optimal_ lösen. Dass ist ein **Wider
 
 ---
 
+### APX-Rucksack
+
+#### Greedy Algorithmus (GA)
+```
+1. Sortiere Items absteigend nach Nutzen*.
+2. Packe die Items in dieser Reihenfolge ein, falls es passt.
+
+*Nutzen: Profit/Gewicht
+```
+
+_Beispiel_:
+```
+ _                      ^  OPT          B              ^  GA           B
+|1| w=E/2             p |               |           p  |    ___________|__
+|_| p=E                 |               |              |   |2          |  |
+                        | ______________               |   |           |  |
+ ______________         ||2             |              |   |           |  |
+|2             |        ||              |              |   |           |  |
+|   w=B        |        ||              |              |   |           |  |
+|   p=B        |        ||              |              | _ |___________|__|
+|              |        ||              |              ||1|            |
+|              |        ||______________|              ||_|            |
+|______________|        +---------------+---->         +---------------+---->
+                                        B    w                         B    w
+```
+`OPT`/`GA` = `B`/`E`
+
+Dieser Algorithmus liefert keine Gütegarantie.
+
+[up](#approximationsalgorithmen)
+
+---
+
+#### Modified Greedy Algorithmus (MGA)
+```
+1. Sortiere Items absteigend nach Nutzen*.
+2. Packe die Items in dieser Reihenfolge ein, falls es passt.
+3. Vergleiche diese Lösung mit der Lösung, die nur das größte Element einpackt.
+
+*Nutzen: Profit/Gewicht
+```
+
+---
+> **Theorem**: `MGA`hat eine scharfe relative Gütegarantie von &alpha; = (1/2)
+---
+
+**Beweis** der Güte:
+
+Sei `j` das erste Item, dass beim [GA](#greedy-algorithmus-ga) nicht eingepackt wird. <br>
+Dementsprechend beim [FA](#fraktrionaler-algorithmus-fa) nur fraktional. <br>
+`Z` ist eingepacktes Gesamtgewicht zum Zeitpunkt, an dem `j` nicht mehr passt.
+
+Es gilt, dass `FA(J)`&le; `Z` + `pj` &le; `GA(J)` + `pj` ist. <br>
+Der Profit von der fraktionalen Lösung ist somit höchstens so groß, wie die von `Z` auf das das nicht mehr in `B` passende Item `j`aufaddiert wird. Und Die Lösung des Greedy Algorithmus kann auch nicht kleiner sein, als letzteres (sie ist ja _mindestens_ `Z`groß).
+
+Da `Opt(J)` &le; `FA(J)`, gilt auch `Opt(J)` &le; `GA(J)` + `pj`. <br>
+Das lässt sich weiter durch `Opt(J)` &le; 2 &middot; max{`GA(J)`, `pj`} abschätzen. <br>
+Schätzen wir weiterhin `pj` durch &pi; ab. &pi; sei das größte in `J` vorkommende Element.
+
+`Opt(J)` &le; 2 &middot; max{`GA(J)`, &pi;}
+
+`MGA` liefert **max{`GA(J)`, &pi;}**, dementsprechend ist `Opt(J)` &le; 2 `MGA`
+
+**Beweis** der Schärfe:
+
+3 Items. (w,p): <br>
+i1 = (&epsilon;/2, &epsilon;), <br>
+i2 = (B/2, B/2), <br>
+i3 = (B/2, B/2)
+
+Opt: i2, i3 mit Profit **B**
+
+MGA: i1, i2 mit Profit **B/2 + &epsilon;**
+
+[up](#approximationsalgorithmen)
+
+---
+
+### PTAS für den Rucksack
+
+#### Modiified Greedy Algorithmus 1 (MGA1)
+```
+1. Sortiere Items absteigend nach Nutzen*.
+2. for i = 1 ... n:
+  - beginne neuen RUcksack mit Item i
+  - vervollständige diese Rucksackinstanz mittels MGA it allen noch folgenden Items
+3. return beste Lösung, der n Lösungen
+```
+
+`MGA1` rät das Element mit dem größten Profit in der Lösung.
+
+---
+> **Theorem**: `MGA1` hat eine scharfe Gütegarantie von &alpha; = 2/3.
+---
+
+`MGA2` rät die zwei Elemente mit dem größten Profiten in der Lösung.
+
+---
+> **Theorem**: `MGA2` hat eine scharfe Gütegarantie von &alpha; = 3/4.
+---
+
+`MGAk` rät die k Elemente mit dem größten Profiten in der Lösung.
+
+---
+> **Theorem**: `MGAk` hat eine scharfe Gütegarantie von &alpha; = (k+1)/(k+2).
+---
+
+**Laufzeit**: <br>
+k Elemente aus n Items auswählen. O(n^k) mal `MGA` ausführen.
+
+**Beweis** der Güte lass ich glaube ich (erstmal) hier raus. [Wird zu crazy in Markdown.]
+
+**Beweis** der Schärfe:
+
+n = k+3 Items. (w,p): <br>
+i1 = (&epsilon;/2, &epsilon;) (kleines Item) <br>
+i2...n = (M, M), i3 = (M, M) (große Items)
+
+Opt: k+2 große Items mit Profit **(k+2) &middot; M**
+
+MGA: i1 und k+1große Items mit Profit **(k+1) &middot; M + &epsilon;**
+
+[up](#approximationsalgorithmen)
+
+---
+
+#### parametrisierter Algorithmus A&epsilon;:
+* k := min{&lceil;1/&epsilon&rceil; - 2, n}
+* Berechne `MGAk`
+
+---
+> **Theorem**: der parametrisierte Algorithmus A&epsilon; ist ein PTAS für das Rucksackproblem.
+---
+A&epsilon; hat eine scharfe Gütegarantie von (1/(&epsilon; - 1))/(1/&epsilon;) = 1 - &epsilon;.
+
+A&epsilon; hat eine Laufzeit von (n^(1/(&epsilon; - 1))
+
+[up](#approximationsalgorithmen)
+
+---
+
+### Dynamische Programmierung
+(exaktes Lösen des Rucksackproblems)
+
+Binärer Baum, also 2^n Möglichkeiten den (infeasable) Rucksack zu packen.
+
+[up](#approximationsalgorithmen)
+
+---
+
+### fraktionales Rucksackproblem
+
+**Gegeben** ist eine Menge I mit n Gegenständen (_items_) I := {1, 2, ..., n}.
+Jedes _item_ n hat ein Gewicht w&#x2099; und einen Profit p&#x2099;.
+Weiterhin gibt es eine Rucksackgröße B.
+
+**Gesucht** ist eine Teilmenge I'&sube;I der _items_ mit w(I') := &Sigma; x&#x2099;w&#x2099; &le; B, so dass gleichzeitig p(I') := &Sigma; p&#x2099; maximiert wird. <br>
+Dabei dürfen Gegenstände "zum Teil" eingepackt werden, x&#x2099; &isin;[0,1] ist der fraktionale Teil des Elements .
+
+#### Fraktionaler Algoritmus (FA)
+```
+1. Sortiere Items absteigend nach Nutzen*.
+2. Packe die Items in dieser Reihenfolge ein, falls es passt.
+3. Sobald ein Item i nicht mehr passt, packe den fraktionalen Teil von i ein, der den Rucksack füllt.
+
+*Nutzen: Profit/Gewicht
+```
+**Laufzeit**: O(n log n)
+
+`FA(J)` liefert obere Schranke für das `Opt(J)` des klassisches Rucksackproblem.
+
+[up](#approximationsalgorithmen)
+
+---
+
 ## Clique
 
 **Gegeben** ist ein Graph G=(V, E)
@@ -244,10 +422,8 @@ Wir könnten J also in polynomieller Zeit _optimal_ lösen. Dass ist ein **Wider
 **Gesucht** ist die größte Clique C (= vollständiger Teilgraph) in G.
 
 ---
-
-**Theorem**:
-
-Falls P &ne; NP, so existiert kein [APX](#approximationsalgorithmus-apx) mit [absoluter Gütegarantie](#absolute-gütegarantie) für das Clique-Problem.
+> **Theorem**: Falls P &ne; NP, so existiert kein [APX](#approximationsalgorithmus-apx) mit [absoluter Gütegarantie](#absolute-gütegarantie) für das Clique-Problem.
+---
 
 **Beweis**(idee):
 
@@ -278,8 +454,8 @@ Weiterhin gibt es m identische Maschinen (CPUs) mit m &gt; 1.
 Das bedeutet: Partition der Jobs J in m disjunkte Teilmengen `J1, J2, ..., Jm`, sodass max(Laufzeit Maschine) minimiert wird.
 
 ---
-
-**Theorem**: Bereits für m=2 ist Multiprocessor Scheduling _NP-vollständig_.
+> **Theorem**: Bereits für m=2 ist Multiprocessor Scheduling _NP-vollständig_.
+---
 
 ### List Scheduling
 (Greedy-Algorithmus)
@@ -291,8 +467,8 @@ immer auf die am Maschine legen, die zuerst Fertig wird.
 _offline_ Problemstellung - d.h. es sind alle Jobs bekannt bevor der Algorithmus startet. Geht auch _online_ ...
 
 ---
-
-**Theorem**: List Scheduling hat eine [scharfe relative Gütegarantie](#scharfe-gütegarantie) von `2-1/m`
+> **Theorem**: List Scheduling hat eine [scharfe relative Gütegarantie](#scharfe-gütegarantie) von `2-1/m`
+---
 
 **Beweis** der [Gütegarantie](#relative-gütegarantie):
 
@@ -350,7 +526,76 @@ Instanz J hat m(m-1) Jobs der Länge 1 und einen großen Job der Länge m.
 * Jobs zunächst absteigend nach Größe sortieren
 * dann List Scheduling
 
-**Theorem**: LPT hat eine [relative Gütegarantie](#relative-gütegarantie) von `(4/3) - (1/3)m`.
+---
+> **Theorem**: LPT hat eine [relative Gütegarantie](#relative-gütegarantie) von `(4/3) - (1/3)m`.
+---
+
+Optimale Lösung könnte gefunden werden.
+
+**Laufzeit** O(m^(n-1))
+
+#### parametrisiertes Scheduling
+
+Algorithmus `Ak` ("`A` in Abhängikeit von Parameter `k`")
+```
+0. Sortiere Jobs
+1. finde optimale Lösung des Problems für die k größten Jobs
+2. schedule die weiteren Jobs mittels LPT
+```
+
+**Laufzeit** O(m^(k-1) + poly(n,m))
+
+_Ab jetzt wird es endlich spaßig._
+
+---
+> **Theorem**: Algorithmus `Ak` garantiert für LPT eine garantierte Güte &alpha; &le; 1 + ((1-(1/m))/(1+&lfloor;k/m&rfloor;))
+---
+
+**Beweis**:
+
+P ist (immernoch) die Summe der Laufzeiten aller Jobs. <br>
+`K` ist die Schedule-Dauer nach Schritt 1. <br>
+Wenn `Ak`(J) = `K`, dann ist Lösung optimal, sonst ist  `Ak`(J) &gt; `K` weil k &lt; n.<br>
+`j` ist der Job, der bis `Ak`(J) läuft. Dann sind alle Maschinen im Zeitintervall [0, `Ak`(J) -`pj`] belegt.<br>
+Es gilt also [immernoch](#list-scheduling):
+
+`P` &ge; `m` &middot; (`Ak`(J) - `pj`) + `pj`
+
+`P` &ge; `m` &middot; `Ak`(J) - (`m` - 1) &middot; `pj` <br>
+`P` &ge; `m` &middot; `Ak`(J) - (`m` - 1) &middot; `pk+1` _(da `pk+1`&ge; `pj`)_
+
+Da [immernoch](#list-scheduling) &rarr; `Opt(J)` &ge; `P`/`m` gilt:
+
+`Opt(J)` &ge; `Ak`(J) - (1 - (1/`m`)) &middot; `pk+1` (4)
+
+Die `k` größten Jobs sind optimal auf alle Maschinen verteilt.<br>
+Durchschnittlich hat also jede Maschine &lfloor;k/m&rfloor; Jobs.
+Genauer hat sogar mindestens eine Maschine 1 + &lfloor;k/m&rfloor; viele der `k`+ 1 größten Jobs. Wir erinnern uns, dass k &lt; n.<br>
+Diese `k`+ 1 größten Jobs laufen jeweils mindestens `pk+1`. Das Optimum muss also mindestens so lange laufen:
+
+`Opt(J)` &ge; (1 + &lfloor;`k`/`m`&rfloor;)) &middot; `pk+1`
+
+Das könnte man nun nach  `pk+1` umstellen und in (4) einsetzen.
+
+---
+
+Nun wird A&epsilon; aus `Ak`gebildet. Dafür wird das `k`groß genug gewählt. <br>
+&epsilon; &ge; ((1-(1/m))/(1+&lfloor;k/m&rfloor;)) <br>
+&epsilon; &ge; ((1-(1/m))/**(1+(k/m)))** <br>
+**&epsilon; + ((&epsilon;k) / m)** &ge; 1 - (1/m) <br>
+((&epsilon;k) / **m**) &ge; 1 - (1/m) - &epsilon; <br>
+&epsilon;k &ge; **m** - 1 - **m**&epsilon; = (1-&epsilon;)m - 1 <br>
+k &ge; ((1-&epsilon;)m - 1)/&epsilon; <br>
+
+Man könnte `k` jetzt auch einfach &ge; &lceil;m/&epsilon;&rceil; wählen.
+
+**Laufzeit?** O(m^(k-1) + poly(n,m)) &rarr; O(m^(m/&epsilon) + poly(n,m))
+
+Ist polynomiell für konstantes &epsilon; und m!
+
+---
+> **Theorem** A&epsilon; ist [EPTAS](#effizientes-polynomielles-approximationsschema-eptas) für das Scheduling-Problem mit fester Anzahl an Maschinen (m)!
+---
 
 [up](#approximationsalgorithmen)
 
@@ -370,8 +615,8 @@ Bin-Kapazität B.
 B auf 1 skalieren, sowie alle Gewichte mit dem gleichen Faktor auf 0 &lt; w &lt; 1.
 
 ---
-
-**Theorem**: Falls P &ne; NP, existiert kein [APX](#approximationsalgorithmus) mit [relative Gütegarantie](#relative-gütegarantie) &alpha; &lt; 1.5 für Bin-Packing.
+> **Theorem**: Falls P &ne; NP, existiert kein [APX](#approximationsalgorithmus) mit [relative Gütegarantie](#relative-gütegarantie) &alpha; &lt; 1.5 für Bin-Packing.
+---
 
 **Beweis** mit [Partitionsproblem](#partitionsproblem):
 
@@ -392,8 +637,8 @@ Lege items der Reihe nach in den aktuellen Bin.
 Falls item nicht passt, neuen Bin aufmachen.
 ```
 ---
-
-**Theorem**: Next-Fit hat eine scharfe (auch [asymptotische](#asymptotische-gütegarantie) [relative Gütegarantie](#relative-gütegarantie) &alpha; = 2.
+> **Theorem**: Next-Fit hat eine scharfe (auch [asymptotische](#asymptotische-gütegarantie) [relative Gütegarantie](#relative-gütegarantie) &alpha; = 2.
+---
 
 **Beweis** der Güte:
 
@@ -411,8 +656,8 @@ Summe der beiden Bins ist größer als B, sonst hätte NF die Items des 2. Bins 
 Lege items der Reihe nach in den ersten Bin, in dem es Platz findet.
 ```
 ---
-
-**Theorem**: First-Fit hat eine scharfe (auch [asymptotische](#asymptotische-gütegarantie) [relative Gütegarantie](#relative-gütegarantie) &alpha; = 2.
+> **Theorem**: First-Fit hat eine scharfe (auch [asymptotische](#asymptotische-gütegarantie) [relative Gütegarantie](#relative-gütegarantie) &alpha; = 2.
+---
 
 **Beweis** der Güte:
 
@@ -468,11 +713,13 @@ Problem ist nur die "_dumme_" Reihenfolge, sonst würde FF das Optimum liefern.
 
 * Fit erst nach Größe sortieren. (Decreasing)
 
-**Theorem**: First-Fit-Decreasing und Best-Fit-Decreasing haben scharfe (nicht-asymptotische) [relative Gütegarantie](#relative-gütegarantie) &alpha; = (3/2). <br>
+---
+> **Theorem**: First-Fit-Decreasing und Best-Fit-Decreasing haben scharfe (nicht-asymptotische) [relative Gütegarantie](#relative-gütegarantie) &alpha; = (3/2). <br>
   *besser geht nicht!*
-
-**Theorem**: First-Fit-Decreasing und Best-Fit-Decreasing haben scharfe asymtotische [relative Gütegarantie](#relative-gütegarantie) &alpha; = (11/9). <br>
+---
+> **Theorem**: First-Fit-Decreasing und Best-Fit-Decreasing haben scharfe asymtotische [relative Gütegarantie](#relative-gütegarantie) &alpha; = (11/9). <br>
   *besser als nicht-asymptotisch*
+---
 
 (ohne Güte-Beweis!)
 
@@ -501,7 +748,9 @@ Instanz:
 
 11m/9m = 11/9
 
-**Theorem**:  Modified First-Fit Decreasing (MFFD) (mit speziellen Regen für Items &isin;(1/6, 1/3] hat scharfe asymptotische relative Gütegarantie von &alpha; = 71/60 = 1.18333....
+---
+> **Theorem**:  Modified First-Fit Decreasing (MFFD) (mit speziellen Regen für Items &isin;(1/6, 1/3] hat scharfe asymptotische relative Gütegarantie von &alpha; = 71/60 = 1.18333....
+---
 
 [up](#approximationsalgorithmen)
 
@@ -527,14 +776,14 @@ Instanz:
 Liegt nicht in APX-schwer!
 
 ---
-
-**Theorem**: Falls P &ne; NP, existiert kein [APX](#approximationsalgorithmus) mit konstanter [absoluter Gütegarantie](#absolute-gütegarantie) k.
+> **Theorem**: Falls P &ne; NP, existiert kein [APX](#approximationsalgorithmus) mit konstanter [absoluter Gütegarantie](#absolute-gütegarantie) k.
+---
 
 **Beweis** durch [Scaling](#scaling). (hier nicht.)
 
 ---
-
-**Theorem**: Falls P &ne; NP, existiert kein [APX](#approximationsalgorithmus) mit konstanter [relativer Gütegarantie](#relativer-gütegarantie) k.
+> **Theorem**: Falls P &ne; NP, existiert kein [APX](#approximationsalgorithmus) mit konstanter [relativer Gütegarantie](#relativer-gütegarantie) k.
+---
 
 **Beweis**:
 
@@ -599,8 +848,8 @@ Nearest/Cheapest Insertion: *relative Güte*: &alpha; = 2 (scharf) <br>
 Farthest Insertion: *relative Güte*: &alpha; &ge; 2.43 <br>
 Random Insertion: *relative Güte*: &alpha; &ge; log(log(n)) / log(log(log(n)))
 
-**Theorem**: Jede mögliche Insertion-Strategie hat eine relative Güte &alpha; &le; log(n) + 1.
-
+---
+> **Theorem**: Jede mögliche Insertion-Strategie hat eine relative Güte &alpha; &le; log(n) + 1.
 ---
 
 #### Verbesserungsheuristiken: 2-Opt (_k-Opt_)
@@ -609,7 +858,11 @@ Mit beliebiger (feasable) Tour starten.
 Alle Kantenpaare (a,b) und (x,y) überprüfen ob (a,x) und (b,y) Tour verbessert.
 ```
 
-**Theorem**: 2-Opt hätte &alpha; &ge; n^(1/2)
+---
+
+> **Theorem**: 2-Opt hätte &alpha; &ge; n^(1/2)
+
+---
 
 **Laufzeit**: O(n&sup2;) pro Iteration. <br>
 Es gibt aber Instanzen die exponentiell viele Iterationen benötigen.
@@ -634,7 +887,9 @@ Lin-Kernighan Heuristik: k-Opt mit wachsendem k und Tricks und so. <br>
 4. Freue dich über die entstandende TSP-Tour
 ```
 
-**Theorem**: MST-Heuristig hat für &Delta;TSP scharfe Gütegarantie von &alpha; = 2.
+---
+> **Theorem**: MST-Heuristig hat für &Delta;TSP scharfe Gütegarantie von &alpha; = 2.
+---
 
 **Beweis** der Güte:
 
@@ -659,7 +914,9 @@ Somit ergibt sich, dass d(T) &le; 2 &middot; Opt(J)
 5. Freue dich über die entstandende TSP-Tour
 ```
 
-**Theorem**: Christofides-Heuristig hat für &Delta;TSP scharfe Gütegarantie von &alpha; = 1.5.
+---
+> **Theorem**: Christofides-Heuristig hat für &Delta;TSP scharfe Gütegarantie von &alpha; = 1.5.
+---
 
 &rarr; beste bekannte Approximationsgüte.
 
@@ -674,11 +931,10 @@ Somit ergibt sich, dass d(T) &le; 2 &middot; Opt(J)
 **Gesucht**: Euler-Tour in diesem Multigraphen G, der jede Kante genau einmal besucht.
 
 ---
-
-**Theorem**:
-* G erlaubt eine Euler-Tour, genau dann wenn alle Knoten geraden Grad haben.
-* G erlaubt einen Euler-Pfad, genau dann wenn alle Knoten bis auf 2 geraden Grad haben.
-
+> **Theorem**:
+> * G erlaubt eine Euler-Tour, genau dann wenn alle Knoten geraden Grad haben.
+> * G erlaubt einen Euler-Pfad, genau dann wenn alle Knoten bis auf 2 geraden Grad haben.
+---
 
 [up](#approximationsalgorithmen)
 
