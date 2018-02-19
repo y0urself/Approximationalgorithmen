@@ -22,6 +22,7 @@
   * [VertexCover](#vertexcover)
   * [WeightedVertexCover](#weightedvertexcover)
   * [SetCover](#setcover)
+  * [WeightedSetCover](#weightedsetcover)
 
 
 # Classics
@@ -983,7 +984,7 @@ Problem ist _NP-vollständig_.
 **Gegeben** ist ein Graph G = (V, E).
 
 **Gesucht** ist eine (möglichst große) Menge von Knoten, die nicht durch Kanten verbunden ist.
-* Formal: **&exist; (v, w) &isin; E: {v, w}&notin;S**
+* Formal: **&forall; (v, w) &isin; E: {v, w}&notin;S**
 
 Beobachtung:
 
@@ -1020,7 +1021,7 @@ Das Matching M hat die maximale Kardinalität in G.
 **Gegeben** ist ein Graph G = (V, E).
 
 **Gesucht** ist eine (möglichst kleine) Knotenmenge C &sube; V die mit jeder Kante im Graphen inzident ist.
-* Formal: min(**&exist; (v, w) &isin; E: {v, w}&cap;C&ne; &empty;**)
+* Formal: min(**&forall; (v, w) &isin; E: {v, w}&cap;C&ne; &empty;**)
 
 ---
 
@@ -1168,7 +1169,7 @@ Güte: `Greedy-Random`  betrachtet die Kanten F. Jedes e&isin;F wird in `Opt(G)`
 **Gegeben** ist ein Graph G = (V, E). Jeder Knoten `v` hat ein Gewicht w(`v`)
 
 **Gesucht** ist die günstigsteKnotenmenge C &sube; V die mit jeder Kante im Graphen inzident ist.
-* Formal: min(**&exist; (v, w) &isin; E: {v, w}&cap;C&ne; &empty;**)
+* Formal: min(**&forall; (v, w) &isin; E: {v, w}&cap;C&ne; &empty;**)
 
 ### `W-Greedy-1`
 
@@ -1230,7 +1231,7 @@ Beobachtung:
 **Beweis**:
 Zum Beispiel V={u,v}, E={(u,v)} mit w(u) = 1,  w(v) = beliebig hoch.
 
-`Opt(G)` wäre 1, `W-Greedy-Mathcing` hat 1+ beliebig hoch.
+`Opt(G)` wäre 1, `W-Greedy-Matching` hat 1+ beliebig hoch.
 
 [up](#approximationsalgorithmen)
 
@@ -1254,7 +1255,7 @@ while E(H) != null:
 ---
 **Beweis**:
 
-**Lemma A.** Zu jedem Zeitpunkt gilt: &exist; x &isin; V: w'(x) &ge; 0.
+**Lemma A.** Zu jedem Zeitpunkt gilt: &forall; x &isin; V: w'(x) &ge; 0.
 
 Immer wenn sich ein w'(x)  (mit x als u) ändert, gilt:
 * Knoten x und v haben beide min. Grad 1 in H.
@@ -1263,7 +1264,7 @@ Immer wenn sich ein w'(x)  (mit x als u) ändert, gilt:
 
 ---
 
-**Lemma B.** Zu jedem Zeitpunkt gilt: &exist; x &isin; V: w(x) = w'(x) + &sum;(y&isin;NG(x)) &alpha;(y,x). <br>
+**Lemma B.** Zu jedem Zeitpunkt gilt: &forall; x &isin; V: w(x) = w'(x) + &sum;(y&isin;NG(x)) &alpha;(y,x). <br>
 *("+ die Summe der bereits wegen der Nachbarschaft abgezogenen &alpha;'s)*
 
 Anfangs ist w(x) = w'(x)
@@ -1277,7 +1278,7 @@ Gleichzeitig werden deg(v) viele Kanten (x, u) gelöscht (aber auf der rechten S
 
 ---
 
-**Lemma C.** &exist; x &isin; C: w(x) = &sum;(y&isin;NG(x)) &alpha;(y,x) und &exist; x &notin; C: w(x) &ge; &sum;(y&isin;NG(x)) &alpha;(y,x). <br>
+**Lemma C.** &forall; x &isin; C: w(x) = &sum;(y&isin;NG(x)) &alpha;(y,x) und &forall; x &notin; C: w(x) &ge; &sum;(y&isin;NG(x)) &alpha;(y,x). <br>
 *(ist x in C, so ist sein Gewicht die Summe der &alpha;'s, ist es nicht in C, so ist es &ge; der Summe der &alpha;'s)*
 
 Folgt aus **Lemma B**.
@@ -1337,7 +1338,7 @@ H -= x, E(H) -= e(x)                  // delete v and w with incident edges from
 >**Theorem** `W-Greedy-Random` garantiert eine (scharfe) **erwartete Güte** von **2**.
 ---
 
-**Beweis**
+**Beweis** "durch Spiel":
 
 * Reihenfolge der Kanten ist zwar beliebig, steht aber fest.
 * Resultierendes VC `C`ist zufällige Teilmenge von V(G).<br>
@@ -1348,28 +1349,362 @@ H -= x, E(H) -= e(x)                  // delete v and w with incident edges from
 >"X(v)/e(v) ist der tatsächliche/wahrscheinliche Anteil des Knotens v am WVC"<br>
 &rarr; Wahrscheinlichkeits**verteilung** von X(v) und exakter Wert von e(v) stehen_a priori_ fest"
 
-&rarr; w(C) = &sum;(v &isin; V(G)) X(v)
+&rarr; w(C) = &sum;(v &isin; V(G)) X(v)<br>
 &rarr; **E**[w(C)] = &sum;(v &isin; V(G)) e(v)
 
 Sei `C*` das optimale VC, welches zu Beginn fest steht.
 
 `C'` = `C` &cap; `C*`  "= die (vom Algo) richtig erkannten Knoten"
 
-TODO ...
+&rarr; w(`C'`) = &sum;(v&isin;`C*`) X(v)<br>
+&rarr; **E**[w(`C'`)] = &sum;(v &isin; `C*`) e(v)
+
+Da `C'`&sube; `C*` und e(v) &le; w(v): **E**[w(C')] =&le; w( `C*`) = `Opt(G)`
+
+---
+
+**Idee** für das Spiel:
+* jeder Knoten v &isin; V erhält e(v) Geldeinheiten, sodass die Gesamtgeldmenge, die verteilt wird E[w(C)]
+* Geldeinheiten werden geschickt zwicshen den Knoten verschoben, so dass:
+  * am Ende jeder Knoten v&isin; `C*` sein Geld maximal verdoppelt
+  * alle anderen Knoten sind pleite.
+
+Wenn das klappt, stimmt das **Theorem**, denn:
+
+**E**[w(`C`)] = 2 &middot; &sum;(v &isin; `C*`) e(v) &le; 2 &middot; `Opt(G)`
+
+#### Verschieberegeln
+
+Schritt 1: <br>
+Jeder Knoten verteilt sein Geld vollständig auf seine inzidenten Kanten. (Jede Kante bekommt demnach von zwei Knoten Geld) - aber: Jede Kante e(u,v) enthält von u und v gleichviel Geld.
+
+Schritt 2: <br>
+Für jede Kante e(u,v) mit $:<br>
+if {u,v}&isin;`C*`: u und v erhalten jeweils $/2.
+
+**Lemma.** Jeder Knoten kann sein Geld e(v) so auf inzidente Kanten verteilen dass gilt: <br>
+** Jede Kante (u,v) erhält von u gleich viel wie von v.**
+
+**Beweis:**
+
+Seien F die im Algorithmus gewählten Kanten. N(v) die zu v adjazenten Knoten.<br>
+Zufallsvariable X(v, u) = w(v) falls v&isin;C ab Iteration der Kante (i,v)&isin; F, sonst 0.
+* für jede Kante (u, v)&isin; F: entweder X(v,u) oder X(u,v) ist &gt; 0.
+* X(v) = &sum;(u&isin; N(v)) X(v, u)
+&rarr; e(v) = **E**[X(v)] = &sum;(u&isin; N(v)) **E**[X(v, u)] - _(**E**[X(v, u)] a priori bekannt!)_<br>
+&rarr; Verteilungsstrategie für Geld e(v): Gib **E**[X(v, u)] jeweils an die Kante (v,u)
+
+Zu zeigen: **E**[X(v, u)] = **E**[X(u, v)] :
+
+**E**[Xv,u] = w(v) &middot; Prob[ (v,u) &isin; F und wählt dabei v ]<br>
+= w(v) &middot; Prob[ (v,u) &isin; F ] · w(u)/w(u)+w(v)<br>
+= w(u) &middot; Prob[ (v,u) &isin; F ] · w(v)/w(u)+w(v)<br>
+= w(u) &middot; Prob[ (v,u) &isin; F und wählt dabei u ] = **E**[Xu,v]
+
+&rarr; &exist; Verteilungsstrategie, so dass am Ende nur die Knoten aus `C*` Geld haben, und zwar maximal 2x so viel wie am Begin des Spiels.
+
+Somit stimmt das **Theorem**.
 
 [up](#approximationsalgorithmen)
 
 ---
 
-## SetCover
+## Minimum SetCover
+
+**Gegeben** ist eine n-elementige Grundmenge M und eine Familie &sum; = {S1, S2, ...} von Teilmengen über M.
+
+**Gesucht**: eine (minimale) Teilfamilie C&sube;&sum; ist ein SetCover, wenn jedes Element aus M in mindestens einer Menge aus C enthalten ist.
+
+**Beispiel:**
+M = { a, b, c, d, e, f, g }<br>
+&sum; = { {a,b,d}, {a,c,e,f}, {f,g}, {d,g}, {b,e,g}, {c,d,f} } <br>
+Lösung C = { {a,b,d}, {b,e,g}, {c,d,f} }
+
+---
+
+VertexCover als SetCover.
+
+Grundmenge M ist die Menge der Kanten. <br>
+Familien &epsilon; sind die Knoten.
+
+## WeightedSetCover
+
+### `WSC-Greedy`
+(basiert auf [`W-Greedy-2`](#w-greedy-2)
+
+```
+C := null
+N := null
+while N != M:
+choose S with minimal relative cost alpha := w(S) / |S\N|
+choose incident vertex v from e
+C = C &cup; {S}    // put S into the cover C
+N = N &cup; S      // put elements in S to the covered elements in N
+```
+w(S) / |S\N| ... wählt die Menge, die pro ungecovertem Element am günstigsten ist.
+
+---
+>**Theorem** `WSC-Greedy` hat eine scharfe Gütegarantie Hn = 1 + (1/2) + (1/3) + ... + (1/n)
+---
+
+_(Hn? &rarr; Harmonische Reihe! Konvergiert gegen unendlich!)_
+
+**Beweis**:
+
+`m1`, `m2`, ... = Elemente M in der Reihenfolge in der `WSC-Greedy` sie covert (Reihenfolge beliebig, wenn gleichzeitig)
+&alpha;(k) = relativer Preis zum Zeitpunkt wenn Element `mk` gecovert wird.`
+
+**Lemma.** Für alle 1 &le; k &le; n: &alpha;(k) &le; `Opt(G)`/(n-k+1).
+
+Sei `C*` das optimale SetCover.
+
+Zu jedem Zeitpunkt k: Man kann mit Kosten &le; `Opt(G)` ein SetCover erzeugen, indem man die Mengen `C*`\ `C` hinzunimmt.<br>
+&rarr; &exist; S'&isin; `C*`\ `C` mit relativem Preis &alpha;(S') &le; `Opt(G)`/|M-N| = `Opt(G)`/(n-k+1)<br>
+(kleiner, wenn mehrere `mi` gleichzeitig gecovert werden) <br>
+&rarr; es wird Menge S mit minimalen relativen Preis &alpha; gewählt, also &alpha; &le; &alpha(S')
+
+**Güte**:
+
+Die Kosten einer gewählten Menge S werden immer als relative Preise komplett auf die neu gecoverten Knoten (in S) augeteilt.
+
+&rarr; w(`C`) = &sum;(1&le;k&le;n) &alpha;(k) &le; &sum;(1&le;k&le;n) `Opt(G)`/|M-N| = `Opt(G)` &middot; ((1/n) + (1/n-1) + ... + (1/3) + (1/2) + 1) = `Opt(G)` &middot; Hn
+
+**Schärfe**:
+```
+Beispielinstanz:
+
+       S1      S2      S3            Sn
+     ┌───┐   ┌───┐   ┌───┐         ┌───┐
+  ┌──┼───┼───┼───┼───┼───┼─────────┼───┼──┐
+  │  │   │   │   │   │   │         │   │  │ Sn+1
+  │  │ • │   │ • │   │ • │   ···   │ • │  │
+  │  │   │   │   │   │   │         │   │  │ 1/1+ε
+  └──┼───┼───┼───┼───┼───┼─────────┼───┼──┘
+     └───┘   └───┘   └───┘         └───┘
+      1/n    1/n-1   1/n-2          1/1
+     
+```
+`Opt(G)` wählt `C*` ={Sn+1} &rarr; **Kosten:** 1+&epsilon;,
+`WSC-Greedy` wählt `C` = {S1, S2, S3, ..., Sn} &rarr; **Kosten:** 1+(1/2)+(1/3)+ ... + (1/n) = Hn
+
+---
+>**Theorem**: `WSC-Greedy` garantiert einen Gütefaktor Hn.
+---
+
+Hn liegt irgendwo zwischen:
+
+ln(n) + 1/n &le; Hn &le; ln(n) + 1
+
+---
+>**Theorem**: Entweder `[sehr-unwahrscheinliches-Komplexitätsresultat]` oder [WSC](#weightedsetcover) lässt sich nicht besser als **(1/2) ln(n)** approximieren
+---
+
+`WSC-Greedy` ist also im wesentlichen der "bestmögliche" Algorithmus.
 
 [up](#approximationsalgorithmen)
 
 ---
-
 ## Linear Programming
 
-### ILP
+### [WSC](#weightedsetcover) als ILP
+
+Variablen:
+
+* binäre Variablen x(s) &isin {0, 1} &forall; S &isin; &sum;:
+* x(s) = 1 &harr; S &isin; C
+
+**min**  ` `  ` `  ` `  &sum;(S &isin; &Sigma;) w(S) &middot; x(S) <br>
+**s.t.** ` ` ` ` ` ` &sum;(S:m&isin;S) x(S) &ge; 1   ` `  ` `  ` `  ` `&forall; m &isin; M <br>
+` `  ` `  ` `  ` `  ` `  ` `x(S) &isin; {0, 1}   ` `  ` `  ` `  ` `  ` `  ` `  ` `  ` `&forall; S &isin; &Sigma;
+
+
+LP-Relaxierung:
+
+**min**  ` `  ` `  ` `  &sum;(S &isin; &Sigma;) w(S) &middot; x(S) <br>
+**s.t.** ` ` ` ` ` ` &sum;(S:m&isin;S) x(S) &ge; 1   ` `  ` `  ` `  ` `&forall; m &isin; M <br>
+` `  ` `  ` `  ` `  ` `  ` `x(S) &ge; 1   ` `  ` `  ` `  ` `  ` `  ` `  ` `  ` `  ` `  ` `&forall; S &isin; &Sigma;
+
+[up](#approximationsalgorithmen)
+
+---
+
+### `WSC-LP-Rounding`
+
+**Definition**:
+Sei f die maximale Frequenz eines Elements, d.h. f := max(m &isin; M) |{S : m &isin; S}|.
+_(In wievielen Mengen kommt ein Element maximal vor?)_
+
+```
+löse LP-Relaxierung von WSC-LP -> Lösungsvektor χ
+wähle alle Mengen S mit χ(S) >= 1/f als Cover
+```
+
+---
+>**Theorem**: `WSC-LP-Rounding` garantiert eine scharfe Gütegarantie von **f**.
+---
+
+**Beweis:**
+
+Constraint &sum;(S:m&isin;S) x(S) &ge; 1: maximal f viele Summanden auf der linken Seite
+* in feasable fraktionaler Lösung: **mind. eine** der Variablen muss Wert &le; 1/f haben.
+* Aufrunden von dieser covert dieses Element m
+* Algorithmus erzeugt gültiges [SetCover](#minimum-setcover)
+
+**Güte**:
+
+Gerundete ILP Lösungsvariablen: Entweder 0 wenn < 1/f, oder aufgerundet auf 1 wenn &ge; 1/f.
+&rarr; ILP Lösung maximal um Faktor f größer als die LP Lösung (die ja untere Schranke ist)
+
+**Beobachtung.** ([Weighted](#weightedvertexcover)) [VertexCover](#minimum-vertexcover) als SetCover hat f = 2.
+
+**Folgerung.** `WSC-LP-Rounding` liefert für [WVC](#weightedvertexcover) eine 2-Approximation.<br>
+(ist halbintegral :D)
+
+[up](#approximationsalgorithmen)
+
+---
+
+### `WSC-LP-Rounding`
+```
+1) solve LP-relaxation from WSC-LP -> solution vector χ, objective function value z(LP).
+2) for j = 1, ..., d * ln(n):
+      create SetCover Cj: choose every S with probability χ(S)
+3) C := Union(j)[C(j)]
+4) If C is not a SetCover with a value &le; 4d*ln(n)*z(LP):
+      forget C
+      goto 2)
+```
+
+---
+>**Theorem**: `WSC-Random-LP-Rounding` findet mit hoher Wahrscheinlichkeit ein SetCover mit Güte O(log n).
+> Im Erwartungswert benötigt er dafür zwei Versuche.
+---
+
+**Beweis** in fünf Schritten:
+
+**I:** Die erwarteten Kosten eines `C(j)` bzw. `C` sind `z(LP)` bzw. `d*ln(n)*z(LP)`.
+
+**I.a:** Die erwarteten Kosten eines `C(j)` sind `z(LP)`:<br>
+**E**[w(`C(j)`)] = &sum;(S &isin; &Sigma;) Pr[S wird gewählt] &middot; w(S) = &sum;(S &isin; &Sigma;) χ(S) &middot; w(S) = z(LP)
+
+**I.b:** Die erwarteten Kosten von `C` sind &le; `d*ln(n)*z(LP)`:<br>
+Gilt.
+
+**II:** Die Kosten von `C` sind "mit hoher Wahrscheinlichkeit" &le; `4d*ln(n)*z(LP)`.<br>
+[Markov'sche Ungleichung](https://de.wikipedia.org/wiki/Markow-Ungleichung_(Stochastik)): Pr[X &ge; t] &le; **E**[X] / t <br>
+> Die Ungleichung gibt eine obere Schranke für die Wahrscheinlichkeit an, dass eine Zufallsvariable eine vorgegebene reelle Zahl überschreitet.
+
+Wende Markov auf I.b an (t = `4d*ln(n)*z(LP)`).<br>
+&rarr; Pr[w(C) &ge; `4d*ln(n)*z(LP)`] &le; `d*ln(n)*z(LP)` / (`4d*ln(n)*z(LP)`) = 1/4
+
+**III:** Für ein beliebiges `C(j)` gilt: Jedes Element ist mit konstanter Wahrscheinlichkeit gecovert.
+
+Betrachte Element `m` &isin; M.
+Es ist in k vielen Sets enthalten.
+Seien χ(1), ..., χ(k) die Werte der zugehörigen LP-Variablen.
+Wir wissen &sum;(1 &le; i &le; k) χ(i) &ge; 1.<br>
+&rarr; Wahrscheinlichkeit, dass m gecovert ist, ist minimal wenn alle χ(i) = 1/k.
+&rarr; Pr[m ist nicht von `C(j)` gecovert] &le; (1 - 1/k)^k &le; 1/e (konstante Wahrscheinlichkeit &lt; 0.37)
+
+**IV:** Vereinigung `C` covert alle Elemente "mit hoher Wahrscheinlichkeit".
+
+Pr[m ist nicht von `C(j)` gecovert] &le; (1/e)^(d &middot; ln(n)) &le; 1 / (4n)
+
+> d wird so gewählt, dass 4n &le; n^d (z.B. d=2 für n &ge; 4) &rarr; 4n &le; (e^(ln(n)))^d = e^(d &middot; ln(n))
+
+&rarr; Summe über alle m: Pr[C ist kein Cover] &le; n &middot; 1/(4n) &le; 1/4.
+
+**V:** **Theorem** durch Kombination von II+IV.
+
+Pr[C ist kein Cover oder teurer als `4d*ln(n)*z(LP)`] &le; <br>
+Pr[C ist kein Cover] + Pr[w(C) &gt; `4d*ln(n)*z(LP)`] &le; 1/4 + 1/4 &le; 1/2
+
+&rarr; Pr[C ist ein Cover mit Kosten maximal `4d*ln(n)*z(LP)`] &ge; 1/2.
+
+Im Erwartungswert findet der Algorithmus eine Lösung mit Güte O(log n) nach 2 Iterationen.
+
+[up](#approximationsalgorithmen)
+
+---
+
+### Linare Programme
+(LP)
+
+Ein LP hat Variablen, eine *lineare* Zielfunktion und mehrere *lineare* Nebenbedigungen.
+
+Zielfunktion wird maximiert oder minimiert.
+
+Normierte Matrixdarstellung:
+```
+min    cTx        x = n-dimensionaler Varablenvekor
+s.t.   Ax <= b    c = n-dimensionaler Kostenvektor
+       x  >= 0    A = m×n Constraint-Matrix
+                  b = m-dimensionale Right-Hand-Side
+                  T meint hier transponiert
+```
+
+[up](#approximationsalgorithmen)
+
+---
+
+### Integer Linare Programme
+(ILP)
+
+Ein LP hat Variablen die ganzzahlig sein müssen, eine *lineare* Zielfunktion und mehrere *lineare* Nebenbedigungen.
+
+Normierte Matrixdarstellung:
+```
+min    cTx        x = n-dimensionaler Varablenvekor
+s.t.   Ax <= b    c = n-dimensionaler Kostenvektor
+       x  >= 0    A = m×n Constraint-Matrix
+       x aus Z    b = m-dimensionale Right-Hand-Side
+                  T meint hier transponiert
+                  Z meint hier ganzzahlig
+```
+
+### Komplexität
+* **ILP**s sind _NP-schwer_ zu lösen
+* **LP**s lassen sich in **polynomieller Zeit** (in n, m) lösen
+  * mit Ellipsoid-Methoden, Innere-Punkte-Methode
+  * Simplex-Algorithmus im worst exponentiell, aber in Praxis top
+  
+  Idee: Wieviel verliert man, wenn man statt ILP nur LP rechnet?
+  
+  [up](#approximationsalgorithmen)
+  
+  ---
+  
+  ### LP-Relaxierung
+  
+  Streiche Ganzzahligkeitsbedingung <br>
+  ILP &rarr; LP
+
+Lösung _L_ der LP-Relaxierung = **Duale Schranke** für das ILP
+* bei Minimierung: untere Schranke
+* bei Maximierung: obere Schranke
+
+* Weniger Einschränkungen &rarr; "bessere" Lösungen (bzgl. Zielfunktion)
+  * größere Lösungsmenge!
+* _L_ im Allgemeinen **infeasible** für das ILP weil höchstwahrscheinlich fraktional
+* Falls _L_ "zufälligerweise" ganzzahlig ist, handelt es sich direkt um die optimale Lösung.
+
+**Primale Schranke**: **feasable** Lösung, die nicht optimal ist (ermittelbar durch Heuristiken, [APX](#approximationsalgorithmus), ...)
+
+```
+            <-LP-Gap->┌─────────────────────────────────────────────────
+                      |   ILP - Lösungen (nur die ganzzahligen :D)
+            ┌─────────┴─────────────────────────────────────────────────
+            |  LP-Relaxierung
+┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─
+            ^         ^         ^
+            |         |         |
+           OptLP     OptILP    zul. primale Lösung
+
+```
+
+[up](#approximationsalgorithmen)
+
+---
 
 ### DP
 
