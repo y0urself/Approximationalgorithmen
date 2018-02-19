@@ -1668,16 +1668,16 @@ s.t.   Ax <= b    c = n-dimensionaler Kostenvektor
   * mit Ellipsoid-Methoden, Innere-Punkte-Methode
   * Simplex-Algorithmus im worst exponentiell, aber in Praxis top
   
-  Idee: Wieviel verliert man, wenn man statt ILP nur LP rechnet?
+Idee: Wieviel verliert man, wenn man statt ILP nur LP rechnet?
   
-  [up](#approximationsalgorithmen)
+[up](#approximationsalgorithmen)
   
-  ---
+---
   
-  ### LP-Relaxierung
+### LP-Relaxierung
   
-  Streiche Ganzzahligkeitsbedingung <br>
-  ILP &rarr; LP
+Streiche Ganzzahligkeitsbedingung <br>
+ILP &rarr; LP
 
 Lösung _L_ der LP-Relaxierung = **Duale Schranke** für das ILP
 * bei Minimierung: untere Schranke
