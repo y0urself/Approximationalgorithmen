@@ -17,8 +17,10 @@
   * [metrisches TSP](#metrisches-tsp)
   * [Euler-Tour](#euler-tour)
   * [Hamilton-Kreis](#hamilton-kreis)
-* [VertexCover und SetCover](#vertexcover-und-setcover)
+  * [EdgeCover](#edgecover)
+  * [IndependentSet](#independentset)
   * [VertexCover](#vertexcover)
+  * [WeightedVertexCover](#weightedvertexcover)
   * [SetCover](#setcover)
 
 
@@ -42,6 +44,18 @@
 ### Approximationsalgorithmus (APX)
 
 * liefert in polynomieller Zeit eine _zulässige_ Lösung für eine beliebige Instanz `J` eines _NP-vollständigen_ KO-Problems **mit** einem Lösungswert `A(J)`einer bestimmten [Gütegarantie](#gütegarantie).
+
+### randomisierter Approximationsalgorithmus
+
+* treffen gewissen Entscheidungen randomisiert
+* aus der Randomisierung resultieren Erwartungswerte für algorithmische Kernzahlen (Laufzeit, Güte, ...)
+
+* Laufzeit sollte weiterhin polynomiell sein (zumindest hier!) - nicht nur erwartet polynomiell!
+* aus Güte wird **erwartete Güte**
+
+[up](#approximationsalgorithmen)
+
+---
 
 ## Gütegarantie
 
@@ -132,6 +146,12 @@ _Beispiel_: O(2^(1/&epsilon;) &middot; n^5)
 PTAS mit einer Laufzeit die polynomiell in n und 1/&epsilon; ist.
 
 _Beispiel_: O(n^5/&epsilon^4)
+
+[up](#approximationsalgorithmen)
+
+---
+
+## Dynamische Programmierung
 
 [up](#approximationsalgorithmen)
 
@@ -381,7 +401,7 @@ A&epsilon; hat eine Laufzeit von (n^(1/(&epsilon; - 1))
 
 ---
 
-### Dynamische Programmierung
+### Rucksack: Dynamische Programmierung
 (exaktes Lösen des Rucksackproblems)
 
 Binärer Baum, also 2^n Möglichkeiten den (infeasable) Rucksack zu packen.
@@ -952,15 +972,406 @@ Problem ist _NP-vollständig_.
 
 ---
 
-# VertexCover und SetCover
+## EdgeCover
 
-## VertexCover
+[up](#approximationsalgorithmen)
+
+---
+
+## IndependentSet
+
+**Gegeben** ist ein Graph G = (V, E).
+
+**Gesucht** ist eine (möglichst große) Menge von Knoten, die nicht durch Kanten verbunden ist.
+* Formal: **&exist; (v, w) &isin; E: {v, w}&notin;S**
+
+Beobachtung:
+
+Wenn C ein [VC](#minimum-vertexcover) ist, ist V\C ein IS. &harr;
+Wenn C ein [minimum VC](#minimum-vertexcover) ist, ist V\C ein maximum IS. &harr;
+
+[up](#approximationsalgorithmen)
+
+---
+
+## Matching
+
+### Maximal Matching
+
+**Gegeben** ist ein Graph G = (V, E).
+
+**Gesucht** ist eine Menge von Kanten M, sodass keine weitere Kante e existiert, die ein weiteres Matching zur Menge hinzufügen kann.
+
+### Maximum Matching
+
+**Gesucht** ist eine Menge von Kanten M, sodass es kein anderes Matching gibt, das für diese Instanz besser ist.
+Das Matching M hat die maximale Kardinalität in G.
+
+### Perfektes Matching
+
+**Gesucht** ist eine Menge von Kanten M, sodass |V|=2&middot;|M| gilt. Jeder Knoten ist gematcht.
+
+[up](#approximationsalgorithmen)
+
+---
+
+## Minimum VertexCover
+
+**Gegeben** ist ein Graph G = (V, E).
+
+**Gesucht** ist eine (möglichst kleine) Knotenmenge C &sube; V die mit jeder Kante im Graphen inzident ist.
+* Formal: min(**&exist; (v, w) &isin; E: {v, w}&cap;C&ne; &empty;**)
+
+---
+
+Beobachtung:
+
+Wenn S ein [IS](#independentset) ist, ist V\S ein VC. &harr;
+Wenn S ein [maximum IS](#minimum-vertexcover) ist, ist V\S ein minimum VC. &harr;
+
+Beobachtung:
+
+Wenn M ein beliebiges Matching in G ist, gilt, dass |M| &le; |C| ist.
+
+---
+
+### `Greedy-1`
+
+```
+C := null
+H := G
+while E(H) != null:
+  choose random edge e (from E(H))
+  choose incident vertex v from e
+  C += v
+  H -= v, E(H) -= e(v)      // delete v with incident edges from H
+```
+
+keine Gütegarantie.
+
+**Beweis:**
+
+Sterninstanz. Algorithmus wählt immer einen der äußeren Knoten.
+
+`Opt(G)` wäre 1, `Greedy-1` hat n-1`.
+
+[up](#approximationsalgorithmen)
+
+---
+
+### `Greedy-2`
+
+```
+C := null
+H := G
+while E(H) != null:
+  choose random edge e (from E(H))
+  choose the incident vertex v from e with the higher cardinality deg(v)
+  C += v
+  H -= v, E(H) -= e(v)      // delete v with incident edges from H
+```
+
+---
+>**Theorem**: `Greedy-2` garantiert nur einen Gütefaktor von &Omega;(log n).
+---
+
+Beobachtung:
+
+`Greedy-2` garantiert einen Gütefaktor von &theta;(log n).
+
+**Beweis** Konstruktion:
+
+n = O(r log r)<br>
+Knotenmengen `L`, `R1`, ..., `Rr`<br>
+`|L|` = `r` <br>
+`|Ri|` = &lfloor;`r`/`i`&rfloor;
+
+* Jeder Knoten in `Ri` hat `i` Kanten nach `L`
+* Jeder Knoten in `L` hat nur max. eine Kante nach `Ri`.
+
+`Opt(G)` wäre r (nämlich die Knotenmenge `L`, jede Kanten hat einen Knoten in `L`)
+
+`Greedy-2` könnte alle Knoten aus allen `Ri` wählen. Hat also O(r log n) Knoten.
+
+[up](#approximationsalgorithmen)
+
+---
+
+### `Greedy-Matching`
+
+```
+C := null
+H := G
+while E(H) != null:
+  choose random edge e (from E(H))
+  choose both incident vertices v, w from e
+  C += v, w
+  H -= v, w, E(H) -= e(v), e(w)      // delete v and w with incident edges from H
+```
+
+---
+>**Theorem**: `Greedy-Matching` garantiert einen scharfen Gütefaktor von **2**.
+---
+
+**Beweis**:
+
+#### Korrektheit:
+Annahme `C`ist kein VC, dann existiert eine Kante e aus E, für die beide Knoten noch nicht in `C` sind. Dann wäre e noch in H und der Algorithmus ist noch nicht fertig.
+
+#### Güte:
+Die von `Greedy-Matching` gewählten Kanten bilden ein maximales [Matching](#matching).
+Wir wissen |M|&le; `Opt(G)`.
+Wir wählen aber genau 2|M| Knoten.
+
+#### Schärfe:
+G sei Pfad mit gerader Anzahl Knoten.
+
+`Opt(G)` = n/2 wählt jeden 2. Knoten.
+
+`Greedy-Matching` = n wählt jeden Knoten.
+
+[up](#approximationsalgorithmen)
+
+---
+
+### `Greedy-Random`
+
+```
+C := null
+H := G
+while E(H) != null:
+choose random edge e (from E(H))
+choose one of the incident vertices v with the probability 50:50 // with coin toss
+C += v
+H -= v, E(H) -= e(v)                  // delete v and w with incident edges from H
+```
+
+
+---
+>**Theorem**: `Greedy-Random` garantiert eine (scharfe) **erwartete Güte** von **2**.
+---
+
+**Beweis**:
+
+Korrektheit: Jede Kante wird gecovert, sonst wäre sie noch in H und der Algorithmus würde noch laufen.
+
+Güte: `Greedy-Random`  betrachtet die Kanten F. Jedes e&isin;F wird in `Opt(G)` gecovert. Der Münzwurf hat eine Wahrscheinlichkeit von &ge; 50% "gut" zu sein, d.h. einen Knoten aus `Opt(G)` zu wählen. Nach maximal `Opt(G)` vielen "guten" Münzwürfen terminiert der Algorithmus (weil dann ist ja alles gecovert).<br>
+&rarr; es gibt maximal 2&middot;`Opt(G)` Münzwürfe. (So würde jeder Münzwurf die Lösung um 1 Knoten erhöhen)
+
+
+[up](#approximationsalgorithmen)
+
+---
+
+## WeightedVertexCover
+
+**Gegeben** ist ein Graph G = (V, E). Jeder Knoten `v` hat ein Gewicht w(`v`)
+
+**Gesucht** ist die günstigsteKnotenmenge C &sube; V die mit jeder Kante im Graphen inzident ist.
+* Formal: min(**&exist; (v, w) &isin; E: {v, w}&cap;C&ne; &empty;**)
+
+### `W-Greedy-1`
+
+```
+C := null
+H := G
+while E(H) != null:
+  choose vertex v with deg(v)>0 and minimum weight // so it has any edges
+  C += v
+  H -= v, E(H) -= e(v)                             // delete v with incident edges from H
+```
+
+keine Gütegarantie.
+
+**Beweis:**
+
+Sterninstanz innerer Knoten hat Gewicht 1+&epsilon;, alle äußeren Gewicht 1.
+Algorithmus wählt immer einen der äußeren Knoten.
+
+`Opt(G)` wäre 1+&epsilon, `W-Greedy-1` hat n-(1+&epsilon)`.
+
+[up](#approximationsalgorithmen)
+
+---
+
+### `W-Greedy-2`
+
+```
+C := null
+H := G
+while E(H) != null:
+  choose vertex v with minimum w(v)/(deg(v)>0)     // minimum weight per edge ...
+  C += v
+  H -= v, E(H) -= e(v)                             // delete v with incident edges from H
+```
+`w(v)/deg(v)` wählt billigen Knoten mit hohem Grad.
+
+---
+>**Theorem**: `W-Greedy-2` garantiert einen Gütefaktor von **&theta;(log n)**.
+---
+
+[up](#approximationsalgorithmen)
+
+---
+
+### `W-Greedy-Matching`
+```
+C := null
+H := G
+while E(H) != null:
+  choose edge e (from E(H)), with min(w(u) + w(v))
+  C += u, v
+  H -= u, v, E(H) -= e(u), e(v)      // delete u and v with incident edges from H
+```
+
+Beobachtung:
+`W-Greedy-Matching` hat keine konstante Gütegarantie. :(
+
+**Beweis**:
+Zum Beispiel V={u,v}, E={(u,v)} mit w(u) = 1,  w(v) = beliebig hoch.
+
+`Opt(G)` wäre 1, `W-Greedy-Mathcing` hat 1+ beliebig hoch.
+
+[up](#approximationsalgorithmen)
+
+---
+
+### `W-Greedy-2-Modified`
+```
+C := null
+H := G
+w'(v) = w(v) for all v
+while E(H) != null:
+  choose vertex v with minimum alpha = w'(v)/(deg(v)>0)    // minimum weight per edge ...
+  for all adjacent vertices u:
+    w'(u) -= alpha                                         // all neigbours will get more expensive
+  C += v, w'(v) = 0
+  H -= v, E(H) -= e(v)                                     // delete v with incident edges
+```
+
+---
+>**Theorem**: `W-Greedy-2-Modified` hat einen Gütefaktor von **2**.
+---
+**Beweis**:
+
+**Lemma A.** Zu jedem Zeitpunkt gilt: &exist; x &isin; V: w'(x) &ge; 0.
+
+Immer wenn sich ein w'(x)  (mit x als u) ändert, gilt:
+* Knoten x und v haben beide min. Grad 1 in H.
+* Knoten v hat kleinstes &alpha; (`alpha`)
+&rarr; w'(v) ist auf jeden Fall &ge; w'(v)/deg(v), da es nicht negativ werden kann.
+
+---
+
+**Lemma B.** Zu jedem Zeitpunkt gilt: &exist; x &isin; V: w(x) = w'(x) + &sum;(y&isin;NG(x)) &alpha;(y,x). <br>
+*("+ die Summe der bereits wegen der Nachbarschaft abgezogenen &alpha;'s)*
+
+Anfangs ist w(x) = w'(x)
+
+Immer wenn sich ein w'(x)  (mit x als u) ändert, dann wird es um ein eindeutiges &alpha;(x,v) reduziert.
+Gleichzeitig wird e(x,v) gelöscht (aber auf der rechten Seite des Terms im Lemma B hinzuaddiert)
+
+Immer wenn sich ein w'(x)  (mit x als v) ändert, dann wird es auf 0 gesetzt.
+Dadurch wird es um deg(v) &middot; &alpha; reduziert.
+Gleichzeitig werden deg(v) viele Kanten (x, u) gelöscht (aber auf der rechten Seite des Terms in Lemma B hinzuaddiert)
+
+---
+
+**Lemma C.** &exist; x &isin; C: w(x) = &sum;(y&isin;NG(x)) &alpha;(y,x) und &exist; x &notin; C: w(x) &ge; &sum;(y&isin;NG(x)) &alpha;(y,x). <br>
+*(ist x in C, so ist sein Gewicht die Summe der &alpha;'s, ist es nicht in C, so ist es &ge; der Summe der &alpha;'s)*
+
+Folgt aus **Lemma B**.
+
+---
+
+**Lemma D.**  w(C) &le; 2 &middot; &sum;(e&isin; E(G)) &alpha;(e).
+
+Sei &alpha;(e) der &alpha; Quotient als e entfernt wurde, bzw. 0, wenn e noch in H ist.
+
+w(C) = &sum;(x&isin; C) w(x) = &sum;(x&isin; C) [&sum;(y&isin;NG(x)) &alpha;(y,x)] (aus **Lemma C**)
+
+Da in der Summe jede Kante *maximal* 2 mal vorkommt, stimmt **Lemma D**.
+
+---
+
+**Lemma E.** &sum;(e&isin; E(G)) &alpha;(e). &le; `Opt(G)`.
+
+Sei `C*` optimales VC.
+
+`Opt(G)` = w(`C*`) = &sum;(x &isin; `C*`) w(x) &le; &sum;(x &isin; `C*`) &sum;(y&isin;NG(x)) &alpha;(y,x)
+
+Da in der Summe jede Kante (also jedes &alpha;(e) *genau* einmal vorkommt, stimmt **Lemma E**.
+Im Optimum muss (natürlich) jede Kante sein.
+
+Aus **Lemma D** und **Lemma E** lässt sich nun ableiten, dass das Theorem gilt.
+
+[up](#approximationsalgorithmen)
+
+---
+
+### Traditionelle Algorithmen für [VC](#minimum-vertexcover) und [WVC](#weightedvertexcover)
+
+Diese "traditionellen Algorithmen" erlauben also in [APX](#apprapproximationsalgorithmus-apx) eine Gütegarantie von 2.
+Geht es (asymptotisch) besser als 2?
+
+---
+>**Theorem** VC erlaubt **kein** [Approximationsschema](#approximationsschema).
+---
+
+---
+
+### randomisiertes WVC
+
+### `W-Greedy-Random`
+
+```
+C := null
+H := G
+while E(H) != null:
+choose random edge e (from E(H))
+choose x = (u or v) with the probability Prob[x=v]=(w(u))/(w(u)+w(v)) //= probability for v
+C += x
+H -= x, E(H) -= e(x)                  // delete v and w with incident edges from H
+```
+---
+>**Theorem** `W-Greedy-Random` garantiert eine (scharfe) **erwartete Güte** von **2**.
+---
+
+**Beweis**
+
+* Reihenfolge der Kanten ist zwar beliebig, steht aber fest.
+* Resultierendes VC `C`ist zufällige Teilmenge von V(G).<br>
+&rarr; Wahrscheinlichkeits**verteilung** von `C`steht _a priori_ fest (wie auch immer)
+
+* Zufallsvariable X(v) = w(v) falls v&isin;C - sonst X(v)=0.
+* Erwartungswert e(v) = **E**[X(v)] ist der Erwartungswert von X(v)
+>"X(v)/e(v) ist der tatsächliche/wahrscheinliche Anteil des Knotens v am WVC"<br>
+&rarr; Wahrscheinlichkeits**verteilung** von X(v) und exakter Wert von e(v) stehen_a priori_ fest"
+
+&rarr; w(C) = &sum;(v &isin; V(G)) X(v)
+&rarr; **E**[w(C)] = &sum;(v &isin; V(G)) e(v)
+
+Sei `C*` das optimale VC, welches zu Beginn fest steht.
+
+`C'` = `C` &cap; `C*`  "= die (vom Algo) richtig erkannten Knoten"
+
+TODO ...
 
 [up](#approximationsalgorithmen)
 
 ---
 
 ## SetCover
+
+[up](#approximationsalgorithmen)
+
+---
+
+## Linear Programming
+
+### ILP
+
+### DP
 
 [up](#approximationsalgorithmen)
 
@@ -974,28 +1385,3 @@ Problem ist _NP-vollständig_.
 
 ## euklidisches TSP
 
-
-
-Folie 16: G^k+1 -> Clique = 1, dann k+1 > k ... Widerspruch
-
-
-Folie 25:
-
-Bin-Packing über Partitionsproblem
-A ={a1, ..., an}
-W ={w1, ..., wn}
-Aufteilen 
-
-\exists? A_1 \dot\cup A_2 = A
-
-s = \sum_{i=1}^{n} a_i
-
-\sum_{a\inA_1} a ) \sum_{a\inA_2} a = s/2
-
-B aus Binpacking:
-B = s/2
-
-
-Folie 35:
-
-FFD worst case: \sum = 11m Kartons vs. Opt():>: \sum = 9m Kartons
