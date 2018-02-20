@@ -574,8 +574,8 @@ MGA: i1, i2 mit Profit **B/2 + &epsilon;**
 ```
 1. Sortiere Items absteigend nach Nutzen*.
 2. for i = 1 ... n:
-  - beginne neuen RUcksack mit Item i
-  - vervollständige diese Rucksackinstanz mittels MGA it allen noch folgenden Items
+  - beginne neuen Rucksack mit Item i
+  - vervollständige diese Rucksackinstanz mittels MGA mit allen noch folgenden Items
 3. return beste Lösung, der n Lösungen
 ```
 
@@ -1032,7 +1032,7 @@ Liegt nicht in APX-schwer!
 **Beweis** durch [Scaling](#scaling). (hier nicht.)
 
 ---
-> **Theorem**: Falls P &ne; NP, existiert kein [APX](#approximationsalgorithmus) mit konstanter [relativer Gütegarantie](#relativer-gütegarantie) k.
+> **Theorem**: Falls P &ne; NP, existiert kein [APX](#approximationsalgorithmus) mit [relativer Gütegarantie](#relativer-gütegarantie) k.
 ---
 
 **Beweis**:
@@ -1482,6 +1482,7 @@ while E(H) != null:
 ---
 >**Theorem**: `W-Greedy-2-Modified` hat einen Gütefaktor von **2**.
 ---
+
 **Beweis**:
 
 **Lemma A.** Zu jedem Zeitpunkt gilt: &forall; x &isin; V: w'(x) &ge; 0.
@@ -1929,10 +1930,71 @@ Algorithmische Idee:
 * Wähle nur tight Sets in das Cover (= primale Variable auf 1 setzen).
 
 ## Steinerbäume
+(Steiner Tree Problem)
+
+* Price-collecting Steiner Tree
+* k-Cardinality Tree
+* Connected Facility Location
+* Steiner Forest
+* Steiner Network
+
+Algemein: es gibt sehr effiziente exakte ILP-basierte Algorithmen hierfür
+
+Aber auch Approximationsalgorithmen
+
+### Steinerbaum auf Graphen
+
+**Gegeben** ist ein Graph G=(T&cup;S, E), (T&cap;S = &empty;) <br>
+Kantenkosten c: E &rarr; **R**(+) <br>
+Terminalknoten T, Steinerknoten S
+
+**Gesucht** ist ein Baum B=(T&cup;S', E') mit S'&sube; S und E'&sube;E und minimalen Kantenkosten c(E')
+
+---
+
+trivial:
+
+|T| = 2 &rarr; shortest path
+
+S=&empty; &rarr; minimum spanning tree
+
+**Lemma**: <br>
+Man kann jede nicht-metrische STP-Instanz (in polynomieller Zeit) auf eine metrische STP Instanz (nur modifizierte Kantengewichte) reduzieren.
+Diese Reduktion bewahrt Approximationsfaktoren (und insb. auch d. Optimum).
 
 [up](#approximationsalgorithmen)
 
 ---
+
+### Distanz-Netzwerk-Heuristik
+
+#### Distanz-Netzwerk (D,d)
+mit vollständigem Hilfsgraphen D=(T, T&times;T) auf dem Terminalknoten T.
+
+Für alle Terminalpaare u,v:
+* sei P(u, v) kürzester Pfad von u nach v in G.
+* Kantengewichte d(u,v) := &sum;(e&isin;P(u,v)) c(e) in D: Länge des kürzesten Pfades.
+
+#### `Algorithmus Distanz-Netzwerk-Heuristik`
+```
+1. Baue Distanznetzwerk (D, d)
+2. Minimaler Spannbaum M in D ermitteln
+3. Teilgraphen H aus G erstellen    // H ist i.A. kein Baum!
+    für jede Kante (u, v) in M wähle die Kanten des Pfades P(u,v)
+4. erzeuge Baum B aus H:
+    B := minimaler Spannbaum in H
+    Solange B Steinerknoten als Blätter hat: Entferne diese Blätter
+    
+-> B ist ein Steinerbaum von G
+```
+
+**Theorem**: Die Distanz-Netzwerk-Heuristik hat scharfe Gütegarantie von 2-2/|T|.
+
+
+[up](#approximationsalgorithmen)
+
+---
+
 
 ## euklidisches TSP
 
