@@ -58,6 +58,235 @@
 
 ---
 
+### Lineare Programme
+(LP)
+
+Ein LP hat Variablen, eine *lineare* Zielfunktion und mehrere *lineare* Nebenbedigungen.
+
+Zielfunktion wird maximiert oder minimiert.
+
+Normierte Matrixdarstellung:
+```
+min    cTx         x = n-dimensionaler Varablenvekor
+s.t.    Ax <= b    c = n-dimensionaler Kostenvektor
+         x >= 0    A = m×n Constraint-Matrix
+                   b = m-dimensionale Right-Hand-Side
+                   T meint hier transponiert
+```
+
+[up](#approximationsalgorithmen)
+
+---
+
+### Integer Lineare Programme
+(ILP)
+
+Ein LP hat Variablen die ganzzahlig sein müssen, eine *lineare* Zielfunktion und mehrere *lineare* Nebenbedigungen.
+
+Normierte Matrixdarstellung:
+```
+min    cTx         x = n-dimensionaler Varablenvekor
+s.t.   Ax  <= b    c = n-dimensionaler Kostenvektor
+        x  >= 0    A = m×n Constraint-Matrix
+        x aus Z    b = m-dimensionale Right-Hand-Side
+                   T meint hier transponiert
+                   Z meint hier ganzzahlig
+```
+
+### Komplexität
+* **ILP**s sind _NP-schwer_ zu lösen
+* **LP**s lassen sich in **polynomieller Zeit** (in n, m) lösen
+* mit Ellipsoid-Methoden, Innere-Punkte-Methode
+* Simplex-Algorithmus im worst exponentiell, aber in Praxis top
+
+
+Idee: <br> Wieviel verliert man, wenn man statt ILP nur LP rechnet?
+
+[up](#approximationsalgorithmen)
+
+---
+
+### LP-Relaxierung
+
+Streiche Ganzzahligkeitsbedingung <br>
+ILP &rarr; LP
+
+Lösung _L_ der LP-Relaxierung = **Duale Schranke** für das ILP
+* bei Minimierung: untere Schranke
+* bei Maximierung: obere Schranke
+
+* Weniger Einschränkungen &rarr; "bessere" Lösungen (bzgl. Zielfunktion)
+* größere Lösungsmenge!
+* _L_ im Allgemeinen **infeasible** für das ILP weil höchstwahrscheinlich fraktional
+* Falls _L_ "zufälligerweise" ganzzahlig ist, handelt es sich direkt um die optimale Lösung.
+
+**Primale Schranke**: **feasable** Lösung, die nicht optimal ist (ermittelbar durch Heuristiken, [APX](#approximationsalgorithmus), ...)
+
+```
+              <-LP-Gap->┌─────────────────────────────────────────────────
+                        |   ILP - Lösungen (nur die ganzzahligen :D)
+              ┌─────────┴─────────────────────────────────────────────────
+              |  LP-Relaxierung
+┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─
+              ^         ^         ^
+              |         |         |
+              OptLP     OptILP    zul. primale Lösung
+
+```
+
+[up](#approximationsalgorithmen)
+
+---
+
+### Duales Programm
+(DP)
+
+Sei [primales Programm](#lineare-programme) ein [Minimierungsproblem](#minimierung).
+Das dazugehörige duale Programm ist ein [Maximierungsproblem](#maximierung), welches die selbe duale Schranke als Optimum hat, wie das primale Programm.
+
+Aus jedem LP lässt sich ein DP erstellen.
+
+**Beispiel:**
+```
+Primales Programm
+min   7 x1 +   x2 + 5 x3           (ZF)
+s.t.    x1 –   x2 + 3 x3 >=  10     (1)
+      5 x1 + 2 x2 –   x3 >=   6     (2)
+        x1,    x2,    x3 >=   0
+```
+Untere Schranke für `(ZF)`?  Koeffizientenvergleich!<br>
+Beobachte: alle **Variablen &ge; 0**
+
+Koeffizientenvergleich von `(ZF)` mit `(1)`: <br>
+7 &ge; 1 +1&ge;–1, 5&ge;3 &rarr; 7x1 + x2 + 5x3 &ge; 10 &rarr; 10 ist untere Schranke
+
+Koeffizientenvergleich von `(ZF)` mit `(1)`+`(2)`: <br>
+```
+6 x1 +   x2 + 2 x3 >= 16     (1)+(2)
+```
+7 &ge; 6, 1 &ge;1, 5 &ge;2  &rarr; 16 ist untere Schranke
+
+Koeffizientenvergleich von (ZF) mit 2·(1)+(2):
+```
+7 x1 + 0 x2 + 2 x3 >= 26     2*(1)+(2)
+```
+7 &ge;7, 1&ge;0, 5&ge;5 &rarr; 26 ist untere Schranke
+
+**Optimaler Lösungsvektor**: x=(7/4),0, (11/4))<br>
+Zielfunktionswert: 26
+
+```
+Duales Programm
+max   10 y1 + 6 y2           (ZF)
+s.t.     y1 + 5 y2 <=  7     (1)
+       - y1 + 2 y2 <=  1     (2)
+       3 y1 - 1 y2 <=  5     (3)
+         y1,    y2,>=  0
+```
+
+**Optimaler Lösungsvektor**: y=(2, 1)<br>
+Zielfunktionswert: 26
+
+[up](#approximationsalgorithmen)
+
+---
+
+Normiertes Duales Programm:
+```
+max    bTy          y = m-dimensionaler Varablenvekor
+s.t.   ATy <= c     b = m-dimensionaler Kostenvektor
+         y >= 0     A = n×m Constraint-Matrix
+         c = n-dimensionale Right-Hand-Side
+         T meint hier transponiert
+```
+
+**Für jedes primale Constraint eine duale Variable**<br>
+**Für jede primale Variable ein duales Constraint**
+
+---
+>**Theorem**: Die optimalen Zielfunktionswerte des primalen und des dualen Programms sind gleich (sofern sie existieren). Man spricht von "starker Dualität"
+---
+
+```
+                          <-LP-Gap->┌─────────────────────────────────────────────────
+                                    |   ILP - Lösungen (nur die ganzzahligen :D)
+──────────────────────────┬─────────┴─────────────────────────────────────────────────
+     Duales Programm      |  LP-Relaxierung (Lineares Programm)
+┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─
+                ^         ^         ^         ^
+                |         |         |         |
+     zul. duale Lösung    |       OptILP    zul. primale Lösung
+                       Duale Schranke
+```
+Jede feasable DP Lösung ist untere Schranke für ILP.<br>
+DP-Approximationen haben eine Güte die _niemals_ besser als LP-Gap werden kann.
+
+[up](#approximationsalgorithmen)
+
+---
+
+### Primal-Dualer Algorithmus
+
+statt LP-Relaxierung:
+
+mit kombinatorischen Algorithmen primale und duale Lösung finden und zeigen, dass diese nicht "zu weit" von einander entfernt sind.
+
+**Vorteile** (gegenüber LP-basierten Verfahren): <br>
+kein LP-Solver &rarr; bessere Laufzeiten
+
+Sind ursprünglich für exakte Algorithmen für Probleme aus _P_ entwickelt worden.
+
+Effizienteste Algorithmen für [Matching](#matching), Network-Flow, (Shortest-Path), ...
+
+[up](#approximationsalgorithmen)
+
+---
+
+### Primal-Dualer Algorithmus
+
+Sei &chi; (&gamma;) eine primale (duale) zulässige (nicht zwingend optimale) Lösung.
+
+#### Primal Complementary Slackness Condition (PCSC)
+
+Sei &alpha; &ge; 1. &forall; 1 &le; j &le; n: Entweder &chi;(j) = 0, oder &sum;(1 &le; i &le; m) a(ij) &chi;(i) &ge; c(j)/&alpha;
+
+#### Dual Complementary Slackness Condition (DCSC)
+
+Sei &beta; &ge; 1. &forall; 1 &le; j &le; m: Entweder &gamma;(j) = 0, oder &sum;(1 &le; i &le; n) a(ij) &gamma;(j) &ge; b(i) &middot; &beta;
+
+Optimale (fraktionale) Lösungen erfüllen PCSC und DCSC mit &alpha; = &beta; = 1!
+
+---
+>**Theorem**: Seien z(&chi;) und z(&gamma;) die Zielfunktionswerte eines Lösungspaares das PCSC und DCSC erfüllt. Es gilt: z(&chi;) &le; &alpha; &middot; &beta; &middot; z(&gamma);
+---
+
+**Beweis** des [Theorems](#primal-dualer-algorithmus):
+
+Verteile &alpha; &middot; &beta; &middot; z(&gamma;) viel Geld auf die dualen Variablen **y(i)**: <br>
+Jedes **y(i**) erhält &alpha; &middot; &beta; &middot; b(i) &middot; &gamma;(i) viel Geld.
+
+Duale Variablen "bezahlen" die primale Lösung.
+* Jedes **y(i)** bezahlt an primale Variable x(j): &alpha; &middot; &beta; &middot; a(ij) &middot; &chi;(j) viel Geld.<br>
+  **y(i)** gibt wegen [DCSC](#dual-complementary-slackness-condition-dcsc) nicht mehr Geld aus, als es hat:<br>
+  &alpha; &middot; &gamma;(i) &middot; &sum;(1 &le; j &le; n) (a(ij) &middot; &chi;(j)) &le; &alpha; &middot;  &gamma;(i) &middot; b(i) &middot; &beta;
+* Jede primale Variable x(j) erhält &alpha; &middot; &chi;(j) &middot; &sum;(1 &le; j &le; n) (a(ij) &middot; &gamma;(i)) viel Geld. <br>
+  Wegen des [PCSC](#primal-complementary-slackness-condition-pcsc): &alpha; &middot; &chi;(j) &middot; &sum;(1 &le; j &le; n) (a(ij) &middot; &gamma;(i)) &le; &alpha; &middot; &chi;(j) &middot; c(j)/&alpha; = &chi;(j) &middot; c(j).<br>
+  Summe des Geldes das auf x(j) Variablen verteilt wird ist &ge; &sum;(1 &le; j &le; n)(&chi;(j) &middot; c(j)) = z(&chi;)
+
+#### (Allgemeines) Vorgehen:
+
+* Starte mit **unzulässiger** (zielfunktionsmäßig "superoptimaler") _primaler_ Lösung und **zulässiger** (zielfunktionsmäßig suboptimaler) _dualer_ Lösung. <br>
+  (meist trivial &chi; = 0, &gamma; = 0)
+* **iterativ**: Verbessere Gültigkeit von &chi; und Optimalität von &gamma;. <br>
+  Veränderungen von &chi; immer ganzzahlig, &gamma; bleibt immer zulässig.<br>
+  Dabei: Benutze &chi; um zu wissen, wie man &gamma; ändern muss und umgekehrt.
+* Terminiere mit zulässigem &chi;, so dass (für bestmögliches &alpha;, &beta;) PCSC und DCSC erfüllt sind.
+* &gamma; gibt untere Schranke &rarr; Gütegarantie &alpha; &middot; &beta;
+
+[up](#approximationsalgorithmen)
+
+---
+
 ## Gütegarantie
 
 ### absolute Gütegarantie
@@ -1028,7 +1257,7 @@ Das Matching M hat die maximale Kardinalität in G.
 Beobachtung:
 
 Wenn S ein [IS](#independentset) ist, ist V\S ein VC. &harr;
-Wenn S ein [maximum IS](#minimum-vertexcover) ist, ist V\S ein minimum VC. &harr;
+Wenn S ein [maximum IS](#independentset) ist, ist V\S ein minimum VC. &harr;
 
 Beobachtung:
 
@@ -1447,6 +1676,7 @@ w(S) / |S\N| ... wählt die Menge, die pro ungecovertem Element am günstigsten 
 >**Theorem** `WSC-Greedy` hat eine scharfe Gütegarantie Hn = 1 + (1/2) + (1/3) + ... + (1/n)
 ---
 
+#### Harmonische Reihe
 _(Hn? &rarr; Harmonische Reihe! Konvergiert gegen unendlich!)_
 
 **Beweis**:
@@ -1513,6 +1743,8 @@ Variablen:
 * binäre Variablen x(s) &isin {0, 1} &forall; S &isin; &sum;:
 * x(s) = 1 &harr; S &isin; C
 
+ILP:
+
 **min**  ` `  ` `  ` `  &sum;(S &isin; &Sigma;) w(S) &middot; x(S) <br>
 **s.t.** ` ` ` ` ` ` &sum;(S:m&isin;S) x(S) &ge; 1   ` `  ` `  ` `  ` `&forall; m &isin; M <br>
 ` `  ` `  ` `  ` `  ` `  ` `x(S) &isin; {0, 1}   ` `  ` `  ` `  ` `  ` `  ` `  ` `  ` `&forall; S &isin; &Sigma;
@@ -1524,12 +1756,19 @@ LP-Relaxierung:
 **s.t.** ` ` ` ` ` ` &sum;(S:m&isin;S) x(S) &ge; 1   ` `  ` `  ` `  ` `&forall; m &isin; M <br>
 ` `  ` `  ` `  ` `  ` `  ` `x(S) &ge; 1   ` `  ` `  ` `  ` `  ` `  ` `  ` `  ` `  ` `  ` `&forall; S &isin; &Sigma;
 
+Duales Programm:
+
+**max**  ` `  ` `  ` `  &sum;(m &isin; M) y(m) <br>
+**s.t.** ` ` ` ` ` ` &sum;(m&isin;S) y(m) &ge; w(S)   ` `  ` `  ` `  ` `&forall; S &isin; &Sigma; <br>
+` `  ` `  ` `  ` `  ` `  ` `y(m) &ge; 1   ` `  ` `  ` `  ` `  ` `  ` `  ` `  ` `  ` `  ` `&forall; m &isin; M
+
 [up](#approximationsalgorithmen)
 
 ---
 
 ### `WSC-LP-Rounding`
 
+#### Frequenz
 **Definition**:
 Sei f die maximale Frequenz eines Elements, d.h. f := max(m &isin; M) |{S : m &isin; S}|.
 _(In wievielen Mengen kommt ein Element maximal vor?)_
@@ -1606,6 +1845,8 @@ Wir wissen &sum;(1 &le; i &le; k) χ(i) &ge; 1.<br>
 &rarr; Wahrscheinlichkeit, dass m gecovert ist, ist minimal wenn alle χ(i) = 1/k.
 &rarr; Pr[m ist nicht von `C(j)` gecovert] &le; (1 - 1/k)^k &le; 1/e (konstante Wahrscheinlichkeit &lt; 0.37)
 
+_Ein m wird demnach mit Wahrscheinlichkeit > 1-(1/e) gecovert._
+
 **IV:** Vereinigung `C` covert alle Elemente "mit hoher Wahrscheinlichkeit".
 
 Pr[m ist nicht von `C(j)` gecovert] &le; (1/e)^(d &middot; ln(n)) &le; 1 / (4n)
@@ -1627,90 +1868,65 @@ Im Erwartungswert findet der Algorithmus eine Lösung mit Güte O(log n) nach 
 
 ---
 
-### Linare Programme
-(LP)
+### `WSC-DP`
+`WSC-Greedy` mittels Dual-Fitting
 
-Ein LP hat Variablen, eine *lineare* Zielfunktion und mehrere *lineare* Nebenbedigungen.
+Alternativer Beweis (mittels Dual-Fitting) für das Theorem von [`WSC-Greedy`](#wsc-greedy).
 
-Zielfunktion wird maximiert oder minimiert.
+---
+Duales Programm (`WSC-DP`):
 
-Normierte Matrixdarstellung:
-```
-min    cTx        x = n-dimensionaler Varablenvekor
-s.t.   Ax <= b    c = n-dimensionaler Kostenvektor
-       x  >= 0    A = m×n Constraint-Matrix
-                  b = m-dimensionale Right-Hand-Side
-                  T meint hier transponiert
-```
-
-[up](#approximationsalgorithmen)
+**max**  ` `  ` `  ` `  &sum;(m &isin; M) y(m) <br>
+**s.t.** ` ` ` ` ` ` &sum;(m&isin;S) y(m) &ge; w(S)   ` `  ` `  ` `  ` `&forall; S &isin; &Sigma; <br>
+` `  ` `  ` `  ` `  ` `  ` `y(m) &ge; 1   ` `  ` `  ` `  ` `  ` `  ` `  ` `  ` `  ` `  ` `&forall; m &isin; M
 
 ---
 
-### Integer Linare Programme
-(ILP)
+&alpha;(m) ... (ist immernoch) relativer Preis zu dem Element m gecovert wird.
+`C` ... primale Lösung mit Wert w(`C`) = &sum;(m&isin;M) &alpha;(m)
 
-Ein LP hat Variablen die ganzzahlig sein müssen, eine *lineare* Zielfunktion und mehrere *lineare* Nebenbedigungen.
+Duale Variablen **y(m)** ... selbe Indexmenge wie relative Preise **&alpha;(m)** ... <br>
+&rarr; aus **&alpha;(m)** feasable duale Lösung bauen.
 
-Normierte Matrixdarstellung:
-```
-min    cTx        x = n-dimensionaler Varablenvekor
-s.t.   Ax <= b    c = n-dimensionaler Kostenvektor
-       x  >= 0    A = m×n Constraint-Matrix
-       x aus Z    b = m-dimensionale Right-Hand-Side
-                  T meint hier transponiert
-                  Z meint hier ganzzahlig
-```
+**Lemma**: Die Lösung mit **y(m)** := **&alpha;(m)**/Hn für alle m&isin; M ist zulässig für `WSC-DP`.
 
-### Komplexität
-* **ILP**s sind _NP-schwer_ zu lösen
-* **LP**s lassen sich in **polynomieller Zeit** (in n, m) lösen
-  * mit Ellipsoid-Methoden, Innere-Punkte-Methode
-  * Simplex-Algorithmus im worst exponentiell, aber in Praxis top
-  
-Idee: Wieviel verliert man, wenn man statt ILP nur LP rechnet?
-  
-[up](#approximationsalgorithmen)
-  
----
-  
-### LP-Relaxierung
-  
-Streiche Ganzzahligkeitsbedingung <br>
-ILP &rarr; LP
+[Hn?](#harmonische-reihe)
 
-Lösung _L_ der LP-Relaxierung = **Duale Schranke** für das ILP
-* bei Minimierung: untere Schranke
-* bei Maximierung: obere Schranke
+**Beweis**
 
-* Weniger Einschränkungen &rarr; "bessere" Lösungen (bzgl. Zielfunktion)
-  * größere Lösungsmenge!
-* _L_ im Allgemeinen **infeasible** für das ILP weil höchstwahrscheinlich fraktional
-* Falls _L_ "zufälligerweise" ganzzahlig ist, handelt es sich direkt um die optimale Lösung.
+Klar ist, dass **y(m)** &ge; 0, &forall; m &isin; M.
 
-**Primale Schranke**: **feasable** Lösung, die nicht optimal ist (ermittelbar durch Heuristiken, [APX](#approximationsalgorithmus), ...)
+Zu zeigen, dass Ungleichungen &sum;(m&isin;S) y(m) &ge; w(S) erfüllt sind.
 
-```
-            <-LP-Gap->┌─────────────────────────────────────────────────
-                      |   ILP - Lösungen (nur die ganzzahligen :D)
-            ┌─────────┴─────────────────────────────────────────────────
-            |  LP-Relaxierung
-┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─
-            ^         ^         ^
-            |         |         |
-           OptLP     OptILP    zul. primale Lösung
+Betrachte beliebige Menge **S** mit k Elementen `m1`, `m2`, ... `mk` <br>
+(Wenn gleichzeitig gecovert, dann Reihenfolge egal (wie zuvor)
 
-```
+Direkt bevor ein Element `mi` gecovert wird, sind alle nachfolgenden Elemente (k-i+1) ungecovert.
+&rarr; **S** könnte sich selber zum relativen Preis &le; w(**S**)/(k-i+1) covern.
 
-[up](#approximationsalgorithmen)
+Es wird immer mit minimalem Preis gecovert. Dementsprechend ist **y(`mi`)** &le; w(**S**)/(k-i+1) &middot; 1/Hn
 
----
+Bilden wir nun die Summe über alle `mi` &isin; **S**:
 
-### DP
+w(**S**) / Hn &middot; (1 + (1/2) + (1/3) + ... + (1/k)) = w(**S**) &middot; (Hk / Hn) &le; w(**S**)
 
-[up](#approximationsalgorithmen)
+### [Primal-Dualer Algorithmus](#primal-dualer-algorithmus) für `WSC`
 
----
+#### [PCSC](#primal-complementary-slackness-condition-pcsc):
+
+&forall; S &isin; &Sigma;: &chi;(S) &ne; 0 &rarr; &sum;(m &isin; S) &gamma;(m) = w(S).
+
+#### [DCSC](#dual-complementary-slackness-condition-dcsc):
+
+&forall; m &isin; M: &gamma;(m) &ne; 0 &rarr; &sum;(S:m &isin; S) &chi;(S) &le; [f](#frequenz).
+
+**Beobachtung**: Da wir (primal) nur 0/1 Lösungen erzeugen werden und f maximale Frequenz ist: DCSC ist immer erfüllt.
+
+**Definition**: &sum;(m &isin; S) y(m) = w(S) &isin; Set S ist tight.
+
+Algorithmische Idee:
+* Erhöhe duale Variablen.
+* Wähle nur tight Sets in das Cover (= primale Variable auf 1 setzen).
 
 ## Steinerbäume
 
